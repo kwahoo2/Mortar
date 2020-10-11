@@ -89,8 +89,8 @@ void GamepadInterface::pollButtons()
         qDebug() << "F11 generated";
         xdo_send_keysequence_window(x, CURRENTWINDOW, "F11", 0); //F11 toggles Stellarium fullscreen and windowed mode
     }
-    aziAxisStickSum += xAxisVal;
-    altAxisStickSum += yAxisVal;
+    aziAxisStickSum += copysign(sqrt(abs(xAxisVal)), xAxisVal); //sqrt to make more precise movement
+    altAxisStickSum += copysign(sqrt(abs(yAxisVal)), yAxisVal);
 
     if (aziAxisStickSum > 0.95)
     {

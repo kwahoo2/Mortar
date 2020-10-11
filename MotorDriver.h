@@ -31,7 +31,7 @@ private:
     int holdPWM, selectedDriver, usePWM, holdCurrentPreset;
     int8_t motorAltPhSelection, motorAziPhSelection;
     int8_t motorAltPhOld, motorAziPhOld;
-    QTimer *aziTimer, *altTimer;
+    QTimer *aziTimer, *altTimer, *manStepHoldTimer;
     ~MotorDriver();
 
     #ifdef RASPBERRYPI
@@ -67,6 +67,7 @@ private slots:
     void aziCheckAndMove();
     void altCheckAndMove();
     void checkShouldHold();
+    void setHold();
     void aziSelPhase(int ph);
     void altSelPhase(int ph);
     void setCurrent(int selcurr);

@@ -23,6 +23,7 @@ extern "C" { //since xdo is a C not a C++ library
 #include <QtGamepad/QGamepad>
 #include <QDebug>
 #include <QTimer>
+#include <cmath>
 
 class GamepadInterface : public QObject
 {

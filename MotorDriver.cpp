@@ -51,11 +51,16 @@ MotorDriver::MotorDriver(QObject *parent) : QObject(parent)
     qDebug() << "degPerStepAzi" << degPerStepAzi;
     qDebug() << "degPerStepAlt" << degPerStepAlt;
     aziTimer = new QTimer;
-    aziTimer->setInterval(baseAltInterval);
+    aziTimer->setInterval(baseAziInterval);
     connect(aziTimer, SIGNAL(timeout()), this, SLOT(aziCheckAndMove()));
     altTimer = new QTimer;
     altTimer->setInterval(baseAltInterval);
     connect(altTimer, SIGNAL(timeout()), this, SLOT(altCheckAndMove()));
+
+    manStepHoldTimer = new QTimer; //timer to avoid full power hold, when Stellarium sychronisation is disabled
+    manStepHoldTimer->setInterval(200);
+    connect(manStepHoldTimer, SIGNAL(timeout()), this, SLOT(setHold()));
+
 
 }
 
@@ -316,6 +321,7 @@ void MotorDriver::aziMoveStep(int val)
         motorAziPhSelection = 3;
 
     aziSelPhase(motorAziPhSelection);
+    manStepHoldTimer->start();
 }
 void MotorDriver::altMoveStep(int val)
 {
@@ -336,6 +342,7 @@ void MotorDriver::altMoveStep(int val)
         motorAltPhSelection = 3;
 
     altSelPhase(motorAltPhSelection);
+    manStepHoldTimer->start();
 }
 
 void MotorDriver::setTargetAltitude (double val)
@@ -378,6 +385,23 @@ void MotorDriver::checkShouldHold()
 
 }
 
+void MotorDriver::setHold()
+{
+#ifdef RASPBERRYPI
+int currPWM;
+setCurrent(holdCurrentPreset);
+currPWM = holdPWM;
+
+if (usePWM)
+{
+    pwmWrite (pwmPin, currPWM);
+}
+#endif
+
+manStepHoldTimer->stop();
+
+}
+
 void MotorDriver::setCurrent(int selcurr)
 {
     #ifdef RASPBERRYPI
@@ -410,10 +434,12 @@ void MotorDriver::setCurrent(int selcurr)
 void MotorDriver::setDegPerStepAzi(double val)
 {
     degPerStepAzi = val;
+    qDebug() << "degPerStepAzi" << degPerStepAzi;
 }
 void MotorDriver::setDegPerStepAlt(double val)
 {
     degPerStepAlt = val;
+    qDebug() << "degPerStepAlt" << degPerStepAlt;
 }
 
 void MotorDriver::setIntervalAzi(int val)
