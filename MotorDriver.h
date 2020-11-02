@@ -28,10 +28,10 @@ private:
     double degPerStepAzi, degPerStepAlt;
     double aziHyster, altHyster;
     int baseAziInterval, baseAltInterval;
-    int holdPWM, selectedDriver, usePWM, holdCurrentPreset;
+    int holdPWM, selectedDriver, usePWM, holdCurrentPreset, runCurrentPreset, powerPeriod;
     int8_t motorAltPhSelection, motorAziPhSelection;
     int8_t motorAltPhOld, motorAziPhOld;
-    QTimer *aziTimer, *altTimer, *manStepHoldTimer;
+    QTimer *aziTimer, *altTimer, *stepHoldWaitTimer;
     ~MotorDriver();
 
     #ifdef RASPBERRYPI
@@ -96,8 +96,10 @@ public slots:
     void selectDriver(int val);
     void enablePWM(int val);
     void setHoldPWM(int val);
-    void selectCurrentPreset(int val);
+    void selectHoldCurrentPreset(int val);
+    void selectRunCurrentPreset(int val);
     void setFastDecay(bool val);
+    void setMaxPowerPeriod(int val);
 
 
 };

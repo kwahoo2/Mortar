@@ -31,9 +31,11 @@ signals:
     void setHysterAzi(const double val);
     void setHysterAlt(const double val);
     void setHoldPWM(const int val);
+    void setMaxPowerPeriod(const int val);
     void enablePWM(const int val);
     void selectDriver(const int val);
-    void selectCurrentPreset(const int val);
+    void selectHoldCurrentPreset(const int val);
+    void selectRunCurrentPreset(const int val);
     void changeTelescopeName(const QString str);
     void changeStellHost(const QString str);
     void givePortSelection(const QString portsel);
@@ -53,12 +55,15 @@ private slots:
     void on_holdPWMSpinBox_valueChanged(int arg1);
     void on_usePWMcheckBox_stateChanged(int arg1);
     void on_driverComboBox_activated(int index);
-    void on_currentComboBox_activated(int index);
+    void on_holdCurrentComboBox_activated(int index);
+    void on_runCurrentComboBox_activated(int index);
     void on_hostLineEdit_textChanged(const QString &arg1);
     void on_telescopeLineEdit_textChanged(const QString &arg1);
     void on_portsComboBox_activated(const QString &arg1);
-
     void on_decayCheckBox_toggled(bool checked);
+    void on_maxPowerPeriodSpinBox_valueChanged(int arg1);
+
+
 
 private:
     double stepsPerMotorRotatAzi, stepsPerMotorRotatAlt;

@@ -44,5 +44,6 @@ private slots:
     void on_actionMotor_Preferences_triggered();
 
     void on_syncGPSButton_clicked();
+    void on_powerDownButton_toggled(bool checked);
 };
 #endif // MAINWINDOW_H

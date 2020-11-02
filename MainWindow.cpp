@@ -35,9 +35,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(prefsdialog, SIGNAL(setHysterAlt(double)), motordriver, SLOT(setHysterAlt(double)));
 
     connect(prefsdialog, SIGNAL(setHoldPWM(int)), motordriver, SLOT(setHoldPWM(int)));
+    connect(prefsdialog, SIGNAL(setMaxPowerPeriod(int)), motordriver, SLOT(setMaxPowerPeriod(int)));
     connect(prefsdialog, SIGNAL(enablePWM(int)), motordriver, SLOT(enablePWM(int)));
     connect(prefsdialog, SIGNAL(selectDriver(int)), motordriver, SLOT(selectDriver(int)));
-    connect(prefsdialog, SIGNAL(selectCurrentPreset(int)), motordriver, SLOT(selectCurrentPreset(int)));
+    connect(prefsdialog, SIGNAL(selectHoldCurrentPreset(int)), motordriver, SLOT(selectHoldCurrentPreset(int)));
+    connect(prefsdialog, SIGNAL(selectRunCurrentPreset(int)), motordriver, SLOT(selectRunCurrentPreset(int)));
     connect(prefsdialog, SIGNAL(setFastDecay(bool)), motordriver, SLOT(setFastDecay(bool)));
     connect(serialdriver, SIGNAL(askForSerial()), this, SLOT(askForSerial()));
     connect(serialdriver, SIGNAL(listPorts(QList<QSerialPortInfo>)), prefsdialog, SLOT(addPortsNames(QList<QSerialPortInfo>)));
@@ -62,6 +64,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->syncButton->setCheckable(true);
     ui->pauseButton->setCheckable(true);
+    ui->powerDownButton->setCheckable(true);
 
     this->setWindowFlags(this->windowFlags() | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint); //don't allow to be hidden by Stellarium in window mode
 }
@@ -156,4 +159,18 @@ void MainWindow::setLocationEdit(QString location)
 void MainWindow::on_syncGPSButton_clicked()
 {
     stelin->enableGPSSync(true);
+}
+
+void MainWindow::on_powerDownButton_toggled(bool checked)
+{
+    if (checked)
+    {
+        ui->powerDownButton->setText("Steppers Disabled");
+        motordriver->stopDriver();
+    }
+    else
+    {
+        ui->powerDownButton->setText("Disable Steppers");
+        motordriver->startDriver();
+    }
 }

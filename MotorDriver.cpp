@@ -26,6 +26,7 @@ MotorDriver::MotorDriver(QObject *parent) : QObject(parent)
     pinMode(pwmPin, OUTPUT); //PWM disabled by default
     digitalWrite(pwmPin, HIGH);
 
+
     #endif
 
     currAltitude = 0.0;
@@ -47,6 +48,10 @@ MotorDriver::MotorDriver(QObject *parent) : QObject(parent)
     selectedDriver = 0; //0 - L298, 1 - DRV8814
     usePWM = 0; //PWM may require root access
     holdCurrentPreset = 0; //limit power when stopped, for DRV8814 only
+    runCurrentPreset = 0; //limit power when running, for DRV8814 only
+    powerPeriod = 200;
+
+
 
     qDebug() << "degPerStepAzi" << degPerStepAzi;
     qDebug() << "degPerStepAlt" << degPerStepAlt;
@@ -57,9 +62,10 @@ MotorDriver::MotorDriver(QObject *parent) : QObject(parent)
     altTimer->setInterval(baseAltInterval);
     connect(altTimer, SIGNAL(timeout()), this, SLOT(altCheckAndMove()));
 
-    manStepHoldTimer = new QTimer; //timer to avoid full power hold, when Stellarium sychronisation is disabled
-    manStepHoldTimer->setInterval(200);
-    connect(manStepHoldTimer, SIGNAL(timeout()), this, SLOT(setHold()));
+    stepHoldWaitTimer = new QTimer; //timer to avoid full power hold, when Stellarium sychronisation is disabled
+    stepHoldWaitTimer->setInterval(powerPeriod);
+    connect(stepHoldWaitTimer, SIGNAL(timeout()), this, SLOT(setHold()));
+    stepHoldWaitTimer->start();
 
 
 }
@@ -68,11 +74,13 @@ void MotorDriver::startDriver()
 {
     aziTimer->start();
     altTimer->start();
+    stepHoldWaitTimer->start();
 }
 void MotorDriver::stopDriver()
 {
     aziTimer->stop();
     altTimer->stop();
+    stepHoldWaitTimer->stop();
     #ifdef RASPBERRYPI
     digitalWrite(altPh0, LOW);
     digitalWrite(altPh1, LOW);
@@ -104,6 +112,8 @@ void MotorDriver::pauseDriver()
 void MotorDriver::aziCheckAndMove ()
 {
     aziTimer->stop();
+    stepHoldWaitTimer->stop();
+
     int divider = static_cast<int>(round(abs((targetAzimuth - currAzimuth)/degPerStepAzi)) + 1);
     int interval = 1000 / divider;
     if (interval < baseAziInterval)
@@ -138,12 +148,16 @@ void MotorDriver::aziCheckAndMove ()
     aziSelPhase(motorAziPhSelection);
 
     aziTimer->start();
+    stepHoldWaitTimer->setInterval(powerPeriod);
+    stepHoldWaitTimer->start();
 
 }
 
 void MotorDriver::altCheckAndMove ()
 {
     altTimer->stop();
+    stepHoldWaitTimer->stop();
+
     int divider = static_cast<int>(round(abs((targetAltitude - currAltitude)/degPerStepAlt)) + 1);
     int interval = 1000 / divider;
     if (interval < baseAltInterval)
@@ -179,6 +193,8 @@ void MotorDriver::altCheckAndMove ()
     altSelPhase(motorAltPhSelection);
 
     altTimer->start();
+    stepHoldWaitTimer->setInterval(powerPeriod);
+    stepHoldWaitTimer->start();
 }
 
 void MotorDriver::aziSelPhase(int ph)
@@ -218,7 +234,6 @@ void MotorDriver::aziSelPhase(int ph)
     }
     if (selectedDriver == 1) //DRV8814
         {
-        setCurrent(0); //DRV8814, current 100%
         switch (ph) {
         case 0:
             digitalWrite(aziAPh, LOW);
@@ -277,7 +292,6 @@ void MotorDriver::altSelPhase(int ph)
     }
     if (selectedDriver == 1) //DRV8814
         {
-        setCurrent(0); //DRV8814, current 100%
         switch (ph) {
         case 0:
             digitalWrite(altAPh, LOW);
@@ -305,7 +319,7 @@ void MotorDriver::altSelPhase(int ph)
 void MotorDriver::aziMoveStep(int val)
 {
     #ifdef RASPBERRYPI
-    setCurrent(0);
+    setCurrent(runCurrentPreset);
     if (usePWM)
     {
         pwmWrite (pwmPin, 100);
@@ -321,12 +335,12 @@ void MotorDriver::aziMoveStep(int val)
         motorAziPhSelection = 3;
 
     aziSelPhase(motorAziPhSelection);
-    manStepHoldTimer->start();
+    stepHoldWaitTimer->start();
 }
 void MotorDriver::altMoveStep(int val)
 {
     #ifdef RASPBERRYPI
-    setCurrent(0);
+    setCurrent(runCurrentPreset);
     if (usePWM)
     {
         pwmWrite (pwmPin, 100);
@@ -342,7 +356,7 @@ void MotorDriver::altMoveStep(int val)
         motorAltPhSelection = 3;
 
     altSelPhase(motorAltPhSelection);
-    manStepHoldTimer->start();
+    stepHoldWaitTimer->start();
 }
 
 void MotorDriver::setTargetAltitude (double val)
@@ -373,7 +387,7 @@ void MotorDriver::checkShouldHold()
     }
     else
     {
-        setCurrent(0);
+        setCurrent(runCurrentPreset);
         currPWM = 100;
 
     }
@@ -398,7 +412,9 @@ if (usePWM)
 }
 #endif
 
-manStepHoldTimer->stop();
+stepHoldWaitTimer->stop();
+stepHoldWaitTimer->setInterval(powerPeriod);
+stepHoldWaitTimer->start();
 
 }
 
@@ -499,11 +515,19 @@ void MotorDriver::setHoldPWM(int val)
 {
     holdPWM = val;
 }
-void MotorDriver::selectCurrentPreset(int val)
+
+void MotorDriver::selectHoldCurrentPreset(int val)
 {
     holdCurrentPreset = val;
-    qDebug() << "Selected current preset:" << val;
+    qDebug() << "Selected hold current preset:" << val;
 }
+
+void MotorDriver::selectRunCurrentPreset(int val)
+{
+    runCurrentPreset = val;
+    qDebug() << "Selected run current preset:" << val;
+}
+
 void MotorDriver::setFastDecay(bool val)
 {
     qDebug() << "Fast decay:" << val;
@@ -519,6 +543,12 @@ void MotorDriver::setFastDecay(bool val)
         digitalWrite(decPin, LOW);
         #endif
     }
+}
+
+void MotorDriver::setMaxPowerPeriod(int val)
+{
+    qDebug() << "Max power period: " << val;
+    powerPeriod = val;
 }
 
 

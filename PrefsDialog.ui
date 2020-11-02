@@ -55,51 +55,27 @@
    </item>
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="1">
-      <widget class="QLabel" name="label_2">
+     <item row="8" column="0">
+      <widget class="QLabel" name="label_12">
        <property name="text">
-        <string>Azimuth axis</string>
+        <string>Hold current (DRV8814)</string>
        </property>
       </widget>
      </item>
-     <item row="6" column="1">
-      <widget class="QComboBox" name="driverComboBox">
-       <item>
-        <property name="text">
-         <string>L298</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>DRV8814</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QDoubleSpinBox" name="aziStepsSpinBox">
-       <property name="maximum">
-        <double>99999.000000000000000</double>
-       </property>
-       <property name="value">
-        <double>400.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="label_10">
+     <item row="7" column="0">
+      <widget class="QLabel" name="label_11">
        <property name="text">
-        <string>Hold force PWM [%]</string>
+        <string>Motor driver type</string>
        </property>
       </widget>
      </item>
-     <item row="4" column="2">
-      <widget class="QDoubleSpinBox" name="altHystSpinBox">
-       <property name="maximum">
-        <double>30.000000000000000</double>
+     <item row="8" column="2">
+      <widget class="QCheckBox" name="decayCheckBox">
+       <property name="enabled">
+        <bool>false</bool>
        </property>
-       <property name="value">
-        <double>10.000000000000000</double>
+       <property name="text">
+        <string>Fast decay</string>
        </property>
       </widget>
      </item>
@@ -113,6 +89,13 @@
        </property>
        <property name="value">
         <number>60</number>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_10">
+       <property name="text">
+        <string>Hold force PWM [%]</string>
        </property>
       </widget>
      </item>
@@ -132,90 +115,6 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Steps per motor rotation</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QDoubleSpinBox" name="aziHystSpinBox">
-       <property name="maximum">
-        <double>30.000000000000000</double>
-       </property>
-       <property name="value">
-        <double>10.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string> Value</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="0">
-      <widget class="QLabel" name="label_12">
-       <property name="text">
-        <string>Hold current (DRV8814)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <widget class="QDoubleSpinBox" name="altRatioSpinBox">
-       <property name="decimals">
-        <number>4</number>
-       </property>
-       <property name="minimum">
-        <double>1.000000000000000</double>
-       </property>
-       <property name="maximum">
-        <double>99999.990000000005239</double>
-       </property>
-       <property name="value">
-        <double>22.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Altitude axis</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="2">
-      <widget class="QSpinBox" name="altIntervalSpinBox">
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>999</number>
-       </property>
-       <property name="value">
-        <number>10</number>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="2">
-      <widget class="QCheckBox" name="usePWMcheckBox">
-       <property name="toolTip">
-        <string>PWM may require root access!</string>
-       </property>
-       <property name="text">
-        <string>Use PWM</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="label_11">
-       <property name="text">
-        <string>Motor driver type</string>
-       </property>
-      </widget>
-     </item>
      <item row="2" column="1">
       <widget class="QDoubleSpinBox" name="aziRatioSpinBox">
        <property name="decimals">
@@ -232,32 +131,15 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="2">
-      <widget class="QDoubleSpinBox" name="altStepsSpinBox">
-       <property name="maximum">
-        <double>99999.000000000000000</double>
-       </property>
-       <property name="value">
-        <double>400.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_7">
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_14">
        <property name="text">
-        <string>Hysteresis [% of step]</string>
+        <string>Max power period [ms]</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_6">
-       <property name="text">
-        <string>Base step interval [ms]</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <widget class="QComboBox" name="currentComboBox">
+     <item row="8" column="1">
+      <widget class="QComboBox" name="holdCurrentComboBox">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -290,24 +172,194 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="1">
+     <item row="3" column="2">
+      <widget class="QSpinBox" name="altIntervalSpinBox">
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>999</number>
+       </property>
+       <property name="value">
+        <number>10</number>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="1">
       <widget class="QComboBox" name="portsComboBox"/>
      </item>
-     <item row="8" column="0">
+     <item row="0" column="2">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Altitude axis</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Steps per motor rotation</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QDoubleSpinBox" name="altStepsSpinBox">
+       <property name="maximum">
+        <double>99999.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>400.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Azimuth axis</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>Hysteresis [% of step]</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>Base step interval [ms]</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QDoubleSpinBox" name="aziHystSpinBox">
+       <property name="maximum">
+        <double>30.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>10.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QDoubleSpinBox" name="altRatioSpinBox">
+       <property name="decimals">
+        <number>4</number>
+       </property>
+       <property name="minimum">
+        <double>1.000000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>99999.990000000005239</double>
+       </property>
+       <property name="value">
+        <double>22.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string> Value</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QSpinBox" name="maxPowerPeriodSpinBox">
+       <property name="minimum">
+        <number>10</number>
+       </property>
+       <property name="maximum">
+        <number>1000</number>
+       </property>
+       <property name="singleStep">
+        <number>10</number>
+       </property>
+       <property name="value">
+        <number>200</number>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="2">
+      <widget class="QCheckBox" name="usePWMcheckBox">
+       <property name="toolTip">
+        <string>PWM may require root access!</string>
+       </property>
+       <property name="text">
+        <string>Use PWM</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QComboBox" name="driverComboBox">
+       <item>
+        <property name="text">
+         <string>L298</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>DRV8814</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="10" column="0">
       <widget class="QLabel" name="label_13">
        <property name="text">
         <string>GPS serial port</string>
        </property>
       </widget>
      </item>
-     <item row="7" column="2">
-      <widget class="QCheckBox" name="decayCheckBox">
+     <item row="1" column="1">
+      <widget class="QDoubleSpinBox" name="aziStepsSpinBox">
+       <property name="maximum">
+        <double>99999.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>400.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="2">
+      <widget class="QDoubleSpinBox" name="altHystSpinBox">
+       <property name="maximum">
+        <double>30.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>10.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="0">
+      <widget class="QLabel" name="label_15">
+       <property name="text">
+        <string>Run current (DRV8814)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="1">
+      <widget class="QComboBox" name="runCurrentComboBox">
        <property name="enabled">
         <bool>false</bool>
        </property>
-       <property name="text">
-        <string>Fast decay</string>
-       </property>
+       <item>
+        <property name="text">
+         <string>100%</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>71%</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>38%</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>

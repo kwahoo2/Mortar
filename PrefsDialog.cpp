@@ -68,6 +68,12 @@ void PrefsDialog::loadSettings()
         ui->holdPWMSpinBox->setValue(holdPWM);
         emit setHoldPWM(holdPWM);
     }
+    if (settings.contains("Common/powerperiod"))
+    {
+        int powerPeriod = settings.value("Common/powerperiod").toInt();
+        ui->maxPowerPeriodSpinBox->setValue(powerPeriod);
+        emit setMaxPowerPeriod(powerPeriod);
+    }
     if (settings.contains("Common/usepwm"))
     {
         int usePWM = settings.value("Common/usepwm").toInt();
@@ -88,26 +94,34 @@ void PrefsDialog::loadSettings()
         emit selectDriver(driver);
         if (driver == 1)
         {
-            ui->currentComboBox->setDisabled(false);
+            ui->holdCurrentComboBox->setDisabled(false);
+            ui->runCurrentComboBox->setDisabled(false);
             ui->decayCheckBox->setDisabled(false);
         }
         else
         {
-            ui->currentComboBox->setDisabled(true);
+            ui->holdCurrentComboBox->setDisabled(true);
+            ui->runCurrentComboBox->setDisabled(true);
             ui->decayCheckBox->setDisabled(true);
         }
     }
-    if (settings.contains("Common/driver"))
+    if (settings.contains("Common/decay"))
     {
         bool decay =  settings.value("Common/decay").toBool();
         ui->decayCheckBox->setChecked(decay);
         emit setFastDecay(decay);
     }
-    if (settings.contains("Common/currentpreset"))
+    if (settings.contains("Common/holdcurrentpreset"))
     {
-        int curr = settings.value("Common/currentpreset").toInt();
-        ui->currentComboBox->setCurrentIndex(curr);
-        emit selectCurrentPreset(curr);
+        int curr = settings.value("Common/holdcurrentpreset").toInt();
+        ui->holdCurrentComboBox->setCurrentIndex(curr);
+        emit selectHoldCurrentPreset(curr);
+    }
+    if (settings.contains("Common/runcurrentpreset"))
+    {
+        int curr = settings.value("Common/runcurrentpreset").toInt();
+        ui->runCurrentComboBox->setCurrentIndex(curr);
+        emit selectRunCurrentPreset(curr);
     }
     if (settings.contains("Stellarium/telescope"))
     {
@@ -223,20 +237,27 @@ void PrefsDialog::on_driverComboBox_activated(int index)
     emit selectDriver(index);
     if (index == 1)
     {
-        ui->currentComboBox->setDisabled(false);
+        ui->holdCurrentComboBox->setDisabled(false);
+        ui->runCurrentComboBox->setDisabled(false);
         ui->decayCheckBox->setDisabled(false);
     }
     else
     {
-        ui->currentComboBox->setDisabled(true);
+        ui->holdCurrentComboBox->setDisabled(true);
+        ui->runCurrentComboBox->setDisabled(true);
         ui->decayCheckBox->setDisabled(true);
     }
 }
 
-void PrefsDialog::on_currentComboBox_activated(int index)
+void PrefsDialog::on_holdCurrentComboBox_activated(int index)
 {
-    settings.setValue("Common/currentpreset", index);
-    emit selectCurrentPreset(index);
+    settings.setValue("Common/holdcurrentpreset", index);
+    emit selectHoldCurrentPreset(index);
+}
+void PrefsDialog::on_runCurrentComboBox_activated(int index)
+{
+    settings.setValue("Common/runcurrentpreset", index);
+    emit selectRunCurrentPreset(index);
 }
 
 void PrefsDialog::on_hostLineEdit_textChanged(const QString &arg1)
@@ -281,3 +302,11 @@ void PrefsDialog::on_decayCheckBox_toggled(bool checked)
     settings.setValue("Common/decay", checked);
     emit setFastDecay(checked);
 }
+
+void PrefsDialog::on_maxPowerPeriodSpinBox_valueChanged(int arg1)
+{
+    settings.setValue("Common/powerperiod", arg1);
+    emit setMaxPowerPeriod(arg1);
+}
+
+
