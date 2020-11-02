@@ -30,9 +30,9 @@ If you want use GPS, enable UART in the rpi-config utility.
 
 ![UART setup][uart]
 
-[uart]: https://raw.githubusercontent.com/kwahoo2/Mortar/master/.github/images/remote.png "Raspberry UART setup" 
+[uart]: https://raw.githubusercontent.com/kwahoo2/Mortar/master/.github/images/rpi-config.png "Raspberry UART setup" 
 
-Download and compile the software
+Download and compile the software.
 
 ```
 sudo apt install qt5-default libqt5gamepad5-dev libqt5serialport5-dev libxdo-dev
@@ -62,7 +62,7 @@ You may use a gamepad to move your telescope. Analog stick works as coarse adjus
 
 ## Telescope calibration and observation
 
-1. If Mortar is connected to Stellarium "Azimuth" nad "Altitude" values should be same as in the Stellarium. 
+1. If Mortar is connected to Stellarium "Azimuth" and "Altitude" values should be same as in the Stellarium. 
 
 2. If you have a GPS module connected, you should see GPS time, date and location values in Mortar. Click "Sync Stellarium with GPS" to correct your time and position. This step is optional. You may set these values manually in Stellarium. 
 
@@ -73,7 +73,7 @@ You may use a gamepad to move your telescope. Analog stick works as coarse adjus
 
 ### Raspberry Pi4 and WiringPi
 
-If you use Rasperry Pi4 you may encounter issues. Check for working version of WiringPi libraries:
+If you use Raspberry Pi4 you may encounter issues. Check for working version of WiringPi libraries:
 http://wiringpi.com/wiringpi-updated-to-2-52-for-the-raspberry-pi-4b/
 
 
