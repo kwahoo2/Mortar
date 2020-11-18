@@ -1,31 +1,31 @@
 /* Copyright (c) 2020, Adrian Przekwas
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice, this
-list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation and/or
-other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors
-may be used to endorse or promote products derived from this software without
-specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation and/or
+ * other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ * may be used to endorse or promote products derived from this software without
+ * specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include "PrefsDialog.h"
 #include "ui_PrefsDialog.h"
@@ -67,17 +67,17 @@ void PrefsDialog::loadSettings()
         double degPerStepAlt = (360.0 / stepsPerMotorRotatAlt) / gearRatioAlt;
         emit setDegPerStepAlt(degPerStepAlt);
     }
-    if (settings.contains("Azimuth/baseinterval"))
+    if (settings.contains("Azimuth/speed"))
     {
-        int baseIntervalAzi = settings.value("Azimuth/baseinterval").toInt();
-        ui->aziIntervalSpinBox->setValue(baseIntervalAzi);
-        emit setIntervalAzi(baseIntervalAzi);
+        int speedAzi = settings.value("Azimuth/speed").toInt();
+        ui->aziSpeedSpinBox->setValue(speedAzi);
+        emit setSpeedAzi(speedAzi);
     }
-    if (settings.contains("Altitude/baseinterval"))
+    if (settings.contains("Altitude/speed"))
     {
-        int baseIntervalAlt = settings.value("Altitude/baseinterval").toInt();
-        ui->altIntervalSpinBox->setValue(baseIntervalAlt);
-        emit setIntervalAlt(baseIntervalAlt);
+        int speedAlt = settings.value("Altitude/speed").toInt();
+        ui->altSpeedSpinBox->setValue(speedAlt);
+        emit setSpeedAlt(speedAlt);
     }
     if (settings.contains("Azimuth/hysterpercentage"))
     {
@@ -96,43 +96,14 @@ void PrefsDialog::loadSettings()
         int holdPWM = settings.value("Common/holdpwm").toInt();
         ui->holdPWMSpinBox->setValue(holdPWM);
         emit setHoldPWM(holdPWM);
+
     }
-    if (settings.contains("Common/powerperiod"))
+    if (settings.contains("Common/runpwm"))
     {
-        int powerPeriod = settings.value("Common/powerperiod").toInt();
-        ui->maxPowerPeriodSpinBox->setValue(powerPeriod);
-        emit setMaxPowerPeriod(powerPeriod);
-    }
-    if (settings.contains("Common/usepwm"))
-    {
-        int usePWM = settings.value("Common/usepwm").toInt();
-        if (usePWM)
-        {
-           ui->usePWMcheckBox->setCheckState(Qt::Checked);
-        }
-        else
-        {
-           ui->usePWMcheckBox->setCheckState(Qt::Unchecked);
-        }
-        emit enablePWM(usePWM);
-    }
-    if (settings.contains("Common/driver"))
-    {
-        int driver = settings.value("Common/driver").toInt();
-        ui->driverComboBox->setCurrentIndex(driver);
-        emit selectDriver(driver);
-        if (driver == 1)
-        {
-            ui->holdCurrentComboBox->setDisabled(false);
-            ui->runCurrentComboBox->setDisabled(false);
-            ui->decayCheckBox->setDisabled(false);
-        }
-        else
-        {
-            ui->holdCurrentComboBox->setDisabled(true);
-            ui->runCurrentComboBox->setDisabled(true);
-            ui->decayCheckBox->setDisabled(true);
-        }
+        int runPWM = settings.value("Common/runpwm").toInt();
+        ui->runPWMSpinBox->setValue(runPWM);
+        emit setRunPWM(runPWM);
+
     }
     if (settings.contains("Common/decay"))
     {
@@ -140,18 +111,7 @@ void PrefsDialog::loadSettings()
         ui->decayCheckBox->setChecked(decay);
         emit setFastDecay(decay);
     }
-    if (settings.contains("Common/holdcurrentpreset"))
-    {
-        int curr = settings.value("Common/holdcurrentpreset").toInt();
-        ui->holdCurrentComboBox->setCurrentIndex(curr);
-        emit selectHoldCurrentPreset(curr);
-    }
-    if (settings.contains("Common/runcurrentpreset"))
-    {
-        int curr = settings.value("Common/runcurrentpreset").toInt();
-        ui->runCurrentComboBox->setCurrentIndex(curr);
-        emit selectRunCurrentPreset(curr);
-    }
+
     if (settings.contains("Stellarium/telescope"))
     {
         telescopeName = settings.value("Stellarium/telescope").toString();
@@ -222,16 +182,16 @@ void PrefsDialog::on_altRatioSpinBox_valueChanged(double arg1)
     emit setDegPerStepAlt(degPerStepAlt);
 }
 
-void PrefsDialog::on_aziIntervalSpinBox_valueChanged(int arg1)
+void PrefsDialog::on_aziSpeedSpinBox_valueChanged(int arg1)
 {
-    settings.setValue("Azimuth/baseinterval", arg1);
-    emit setIntervalAzi(arg1);
+    settings.setValue("Azimuth/speed", arg1);
+    emit setSpeedAzi(arg1);
 }
 
-void PrefsDialog::on_altIntervalSpinBox_valueChanged(int arg1)
+void PrefsDialog::on_altSpeedSpinBox_valueChanged(int arg1)
 {
-    settings.setValue("Altitude/baseinterval", arg1);
-    emit setIntervalAlt(arg1);
+    settings.setValue("Altitude/speed", arg1);
+    emit setSpeedAlt(arg1);
 }
 
 void PrefsDialog::on_aziHystSpinBox_valueChanged(double arg1)
@@ -252,42 +212,13 @@ void PrefsDialog::on_holdPWMSpinBox_valueChanged(int arg1)
     emit setHoldPWM(arg1);
 }
 
-
-
-void PrefsDialog::on_usePWMcheckBox_stateChanged(int arg1)
+void PrefsDialog::on_runPWMSpinBox_valueChanged(int arg1)
 {
-    settings.setValue("Common/usepwm", arg1);
-    emit enablePWM(arg1);
+    settings.setValue("Common/runpwm", arg1);
+    emit setRunPWM(arg1);
 }
 
-void PrefsDialog::on_driverComboBox_activated(int index)
-{
-    settings.setValue("Common/driver", index);
-    emit selectDriver(index);
-    if (index == 1)
-    {
-        ui->holdCurrentComboBox->setDisabled(false);
-        ui->runCurrentComboBox->setDisabled(false);
-        ui->decayCheckBox->setDisabled(false);
-    }
-    else
-    {
-        ui->holdCurrentComboBox->setDisabled(true);
-        ui->runCurrentComboBox->setDisabled(true);
-        ui->decayCheckBox->setDisabled(true);
-    }
-}
 
-void PrefsDialog::on_holdCurrentComboBox_activated(int index)
-{
-    settings.setValue("Common/holdcurrentpreset", index);
-    emit selectHoldCurrentPreset(index);
-}
-void PrefsDialog::on_runCurrentComboBox_activated(int index)
-{
-    settings.setValue("Common/runcurrentpreset", index);
-    emit selectRunCurrentPreset(index);
-}
 
 void PrefsDialog::on_hostLineEdit_textChanged(const QString &arg1)
 {
@@ -332,10 +263,5 @@ void PrefsDialog::on_decayCheckBox_toggled(bool checked)
     emit setFastDecay(checked);
 }
 
-void PrefsDialog::on_maxPowerPeriodSpinBox_valueChanged(int arg1)
-{
-    settings.setValue("Common/powerperiod", arg1);
-    emit setMaxPowerPeriod(arg1);
-}
 
 

@@ -18,6 +18,7 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 SOURCES += \
     GamepadInterface.cpp \
     MotorDriver.cpp \
+    MotorWorker.cpp \
     SerialDriver.cpp \
     PrefsDialog.cpp \
     StellarInterface.cpp \
@@ -28,6 +29,7 @@ HEADERS += \
     GamepadInterface.h \
     MainWindow.h \
     MotorDriver.h \
+    MotorWorker.h \
     SerialDriver.h\
     PrefsDialog.h \
     StellarInterface.h
@@ -40,7 +42,15 @@ LIBS += -lxdo
 
 linux {
     contains(QMAKE_HOST.arch, arm.*):{
-        LIBS += -lwiringPi
+        LIBS += -lpigpio -lrt
+        HEADERS += \
+            CBoard.h \
+            CDigitalOutput.h \
+            CPWM.h
+        SOURCES += \
+            CBoard.cpp \
+            CDigitalOutput.cpp \
+            CPWM.cpp \
     }
 }
 

@@ -27,78 +27,66 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MOTORDRIVER_H
-#define MOTORDRIVER_H
+#ifndef MOTORWORKER_H
+#define MOTORWORKER_H
 
 #ifdef __arm__
 #define RASPBERRYPI
 #endif
 
-#include <MotorWorker.h>
+#ifdef RASPBERRYPI
+#include <CBoard.h>
+#include <CDigitalOutput.h>
+#include <CPWM.h>
+#endif
 
-#include <QObject>
-#include <QDebug>
-#include <cmath>
+#include <QThread>
 
-
-class MotorDriver : public QObject
+class MotorWorker : public QThread
 {
     Q_OBJECT
 public:
-    explicit MotorDriver(QObject *parent = nullptr);
-
-private:
-    double currAltitude = 0.0;
-    double currAzimuth = 0.0;
-    double targetAltitude = 0.0;
-    double targetAzimuth = 0.0;
-    double manualAltitudeCorrection = 0.0;
-    double manualAzimuthCorrection = 0.0;
-    double degPerStepAzi = 360.0/(400.0*44.0);
-    double degPerStepAlt = 360.0/(400.0*22.0);
-    double aziHyster = 0.1 * degPerStepAzi; //some hysteresis factor to compensate gears clearance, elemnts flexibility, should be much smaller than single step size
-    double altHyster = 0.1 * degPerStepAlt;
-
-    bool isSynced = false;
-    ~MotorDriver();
-
-    MotorWorker *mWorker;
-
-private slots:
+    explicit MotorWorker(QObject *parent = nullptr);
 
 public:
-    void startDriver();
-    void stopDriver();
-    void pauseDriver(bool val);
-
-public slots:
-    void setTargetAltitude (double val);
-    void setTargetAzimuth (double val);
-    void setCurrAltitude (double val);
-    void setCurrAzimuth (double val);
-    void updateAltitudeStepperTarget();
-    void updateAzimuthStepperTarget();
-
-    void aziMoveStep(double val);
-    void altMoveStep(double val);
-
-    void setDegPerStepAzi(double val);
-    void setDegPerStepAlt(double val);
-    void setHysterAzi(double val);
-    void setHysterAlt(double val);
-
-    void setSpeedAzi(int val);
-    void setSpeedAlt(int val);
-
-    void setFastDecay(bool val);
+    void stop() {worker_stopped = true;}
+    void setMaxSpeedAlt(int speed);
+    void setMaxSpeedAzi(int speed);
+    void disableSteppers(bool val);
+    void setPaused(bool val);
     void setHoldPWM(int val);
     void setRunPWM(int val);
 
-signals:
-    void setStepperAlt(double step);
-    void setStepperAzi(double step);
 
+public slots:
+    void setPositionAlt(double pos);
+    void setPositionAzi(double pos);
+
+signals:
+    void sendPinStates(bool aPh, bool bPh, double aP, double bP);
+
+private:
+    void run() override;
+    volatile bool worker_stopped = false;
+    void calcPinsValues(double targetPos, double &actPos,
+                        double timeDeltaD, double maxSpeed,
+                        bool &aPhase, bool &bPhase, double &aPWM, double &bPWM);
+
+    double targetPosAlt = 0.0;
+    double actPosAlt = 0.0;
+    double targetPosAzi = 0.0;
+    double actPosAzi = 0.0;
+    double maxSpeedAlt = 100.0;
+    double maxSpeedAzi = 100.0;
+    double allowedError = 0.05;
+    bool limitPower = true;
+    double runPower = 0.4;
+    double holdPower = 0.2;
+    bool steppersDisabled = false;
+    bool paused = false;
+    qint64 lastTime;
+    uint pwmRange = 1000;
 
 };
 
-#endif // MOTORDRIVER_H
+#endif // MOTORWORKER_H

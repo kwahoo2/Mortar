@@ -1,31 +1,31 @@
 /* Copyright (c) 2020, Adrian Przekwas
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice, this
-list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation and/or
-other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors
-may be used to endorse or promote products derived from this software without
-specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation and/or
+ * other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ * may be used to endorse or promote products derived from this software without
+ * specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
@@ -50,25 +50,23 @@ MainWindow::MainWindow(QWidget *parent)
     connect(stelin, SIGNAL(sendDate(QDate)), this, SLOT(setDateEdit(QDate)));
     connect(stelin, SIGNAL(sendLocationstr(QString)), this, SLOT(setLocationEdit(QString)));
 
-    connect(gamepadin, SIGNAL(aziMoveStep(int)), motordriver, SLOT(aziMoveStep(int)));
-    connect(gamepadin, SIGNAL(altMoveStep(int)), motordriver, SLOT(altMoveStep(int)));
+    connect(gamepadin, SIGNAL(aziMoveStep(double)), motordriver, SLOT(aziMoveStep(double)));
+    connect(gamepadin, SIGNAL(altMoveStep(double)), motordriver, SLOT(altMoveStep(double)));
 
     connect(prefsdialog, SIGNAL(setDegPerStepAzi(double)), motordriver, SLOT(setDegPerStepAzi(double)));
     connect(prefsdialog, SIGNAL(setDegPerStepAlt(double)), motordriver, SLOT(setDegPerStepAlt(double)));
 
-    connect(prefsdialog, SIGNAL(setIntervalAzi(int)), motordriver, SLOT(setIntervalAzi(int)));
-    connect(prefsdialog, SIGNAL(setIntervalAlt(int)), motordriver, SLOT(setIntervalAlt(int)));
-    connect(prefsdialog, SIGNAL(setIntervalAzi(int)), gamepadin, SLOT(setInterval(int)));
+    connect(prefsdialog, SIGNAL(setSpeedAzi(int)), motordriver, SLOT(setSpeedAzi(int)));
+    connect(prefsdialog, SIGNAL(setSpeedAlt(int)), motordriver, SLOT(setSpeedAlt(int)));
+    connect(prefsdialog, SIGNAL(setSpeedAzi(int)), gamepadin, SLOT(setSpeedAzi(int)));
+    connect(prefsdialog, SIGNAL(setSpeedAlt(int)), gamepadin, SLOT(setSpeedAlt(int)));
 
     connect(prefsdialog, SIGNAL(setHysterAzi(double)), motordriver, SLOT(setHysterAzi(double)));
     connect(prefsdialog, SIGNAL(setHysterAlt(double)), motordriver, SLOT(setHysterAlt(double)));
 
     connect(prefsdialog, SIGNAL(setHoldPWM(int)), motordriver, SLOT(setHoldPWM(int)));
-    connect(prefsdialog, SIGNAL(setMaxPowerPeriod(int)), motordriver, SLOT(setMaxPowerPeriod(int)));
-    connect(prefsdialog, SIGNAL(enablePWM(int)), motordriver, SLOT(enablePWM(int)));
-    connect(prefsdialog, SIGNAL(selectDriver(int)), motordriver, SLOT(selectDriver(int)));
-    connect(prefsdialog, SIGNAL(selectHoldCurrentPreset(int)), motordriver, SLOT(selectHoldCurrentPreset(int)));
-    connect(prefsdialog, SIGNAL(selectRunCurrentPreset(int)), motordriver, SLOT(selectRunCurrentPreset(int)));
+    connect(prefsdialog, SIGNAL(setRunPWM(int)), motordriver, SLOT(setRunPWM(int)));
+
     connect(prefsdialog, SIGNAL(setFastDecay(bool)), motordriver, SLOT(setFastDecay(bool)));
     connect(serialdriver, SIGNAL(askForSerial()), this, SLOT(askForSerial()));
     connect(serialdriver, SIGNAL(listPorts(QList<QSerialPortInfo>)), prefsdialog, SLOT(addPortsNames(QList<QSerialPortInfo>)));
@@ -150,12 +148,12 @@ void MainWindow::on_pauseButton_toggled(bool checked)
     if (checked)
     {
         ui->pauseButton->setText("Movement paused");
-        motordriver->pauseDriver();
+        motordriver->pauseDriver(true);
     }
     else
     {
         ui->pauseButton->setText("Pause movement");
-        motordriver->startDriver();
+        motordriver->pauseDriver(false);
     }
 }
 
