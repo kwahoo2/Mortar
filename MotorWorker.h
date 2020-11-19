@@ -56,6 +56,7 @@ public:
     void setPaused(bool val);
     void setHoldPWM(int val);
     void setRunPWM(int val);
+    void setFastDecay(bool val);
 
 
 public slots:
@@ -86,6 +87,7 @@ private:
     bool paused = false;
     qint64 lastTime;
     uint pwmRange = 1000;
+    bool fastDecay = false;
 
 };
 

@@ -51,8 +51,12 @@ public:
     ~MainWindow();
 
 private:
-    double currAltitude;
-    double currAzimuth;
+    double currAltitude = 0.0;
+    double currAzimuth = 0.0;
+    double baseAltCorr = 0.0;
+    double baseAziCorr = 0.0;
+    double altManCorr = 0.0;
+    double aziManCorr = 0.0;
     Ui::MainWindow *ui;
     StellarInterface *stelin;
     GamepadInterface *gamepadin;
@@ -63,6 +67,9 @@ private:
 private slots:
     void setAzimuth (double azimuth);
     void setAltitude (double altitude);
+    void setManAziCorr(double azimuth);
+    void setManAltCorr(double altitude);
+
     void askForSerial();
     void setTimeEdit(QTime time);
     void setDateEdit(QDate date);
@@ -74,5 +81,7 @@ private slots:
 
     void on_syncGPSButton_clicked();
     void on_powerDownButton_toggled(bool checked);
+    void on_resAziButton_clicked();
+    void on_resAltButton_clicked();
 };
 #endif // MAINWINDOW_H

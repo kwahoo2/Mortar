@@ -98,6 +98,9 @@ signals:
     void setStepperAlt(double step);
     void setStepperAzi(double step);
 
+    void showManualAltCorr(double val);
+    void showManualAziCorr(double val);
+
 
 };
 

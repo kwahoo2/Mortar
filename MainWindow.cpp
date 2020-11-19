@@ -41,9 +41,6 @@ MainWindow::MainWindow(QWidget *parent)
     prefsdialog = new PrefsDialog(this); //dialog with options
     prefsdialog->setModal(false);
 
-    currAltitude = 0.0;
-    currAzimuth = 0.0;
-
     connect(stelin, SIGNAL(sendAzimuthVal(double)), this, SLOT(setAzimuth(double)));
     connect(stelin, SIGNAL(sendAltitudeVal(double)), this, SLOT(setAltitude(double)));
     connect(stelin, SIGNAL(sendTime(QTime)), this, SLOT(setTimeEdit(QTime)));
@@ -76,6 +73,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(prefsdialog, SIGNAL(changeStellHost(QString)), stelin, SLOT(changeStellHost(QString)));
     connect(serialdriver, SIGNAL(gotSerialString(QString)), stelin, SLOT(gotSerialString(QString)));
 
+    connect(motordriver, SIGNAL(showManualAziCorr(double)), this, SLOT(setManAziCorr(double)));
+    connect(motordriver, SIGNAL(showManualAltCorr(double)), this, SLOT(setManAltCorr(double)));
+
     serialdriver->refreshPorts();
     prefsdialog->loadSettings();
 
@@ -106,6 +106,18 @@ void MainWindow::setAltitude(double altitude)
     currAltitude = altitude;
     ui->labelAltitude->setNum(altitude);
 }
+
+void MainWindow::setManAziCorr(double azimuth)
+{
+    aziManCorr = azimuth;
+    ui->labelManAzi->setNum(aziManCorr-baseAziCorr);
+}
+void MainWindow::setManAltCorr(double altitude)
+{
+    altManCorr = altitude;
+    ui->labelManAlt->setNum(altManCorr-baseAltCorr);
+}
+
 
 MainWindow::~MainWindow()
 {
@@ -200,4 +212,17 @@ void MainWindow::on_powerDownButton_toggled(bool checked)
         ui->powerDownButton->setText("Disable Steppers");
         motordriver->startDriver();
     }
+}
+
+void MainWindow::on_resAziButton_clicked()
+{
+    baseAziCorr = aziManCorr;
+    ui->labelManAzi->setNum(aziManCorr-baseAziCorr);
+
+}
+
+void MainWindow::on_resAltButton_clicked()
+{
+    baseAltCorr = altManCorr;
+    ui->labelManAlt->setNum(altManCorr-baseAltCorr);
 }

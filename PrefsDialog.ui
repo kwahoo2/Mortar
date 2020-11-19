@@ -148,7 +148,7 @@
      <item row="4" column="1">
       <widget class="QDoubleSpinBox" name="aziHystSpinBox">
        <property name="maximum">
-        <double>30.000000000000000</double>
+        <double>300.000000000000000</double>
        </property>
        <property name="value">
         <double>10.000000000000000</double>
@@ -205,7 +205,7 @@
      <item row="4" column="2">
       <widget class="QDoubleSpinBox" name="altHystSpinBox">
        <property name="maximum">
-        <double>30.000000000000000</double>
+        <double>300.000000000000000</double>
        </property>
        <property name="value">
         <double>10.000000000000000</double>

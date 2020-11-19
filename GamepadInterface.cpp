@@ -126,7 +126,7 @@ void GamepadInterface::pollButtons()
     if (yAxisVal > deadzone || yAxisVal < -deadzone)
     {
 
-       emit altMoveStep(yAxisVal * altSpeed * (static_cast<double>(poolInterval) / 1000.0));
+       emit altMoveStep(-yAxisVal * altSpeed * (static_cast<double>(poolInterval) / 1000.0)); //Yaxis is reversed
     }
 
     if (xAxisVal > deadzone || xAxisVal < -deadzone)

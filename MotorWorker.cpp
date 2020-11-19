@@ -155,6 +155,14 @@ void MotorWorker::run()
             bEnblPinPWMAzi.drive(0);
 
         }
+        if (fastDecay)
+        {
+            decPin.high();
+        }
+        else
+        {
+            decPin.low();
+        }
     #endif
         usleep(200);
 
@@ -298,5 +306,10 @@ void MotorWorker::setPaused(bool val)
     paused = val;
 }
 
+void MotorWorker::setFastDecay(bool val)
+{
+    qDebug() << "Fast decay:" << val;
+    fastDecay = val;
+}
 
 

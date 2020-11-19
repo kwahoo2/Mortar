@@ -35,6 +35,7 @@ MotorDriver::MotorDriver(QObject *parent) : QObject(parent)
 
 
     mWorker = new MotorWorker(this);
+    mWorker->start();
 
     qDebug() << "degPerStepAzi" << degPerStepAzi;
     qDebug() << "degPerStepAlt" << degPerStepAlt;
@@ -42,7 +43,7 @@ MotorDriver::MotorDriver(QObject *parent) : QObject(parent)
     connect(this, SIGNAL(setStepperAlt(double)), mWorker, SLOT(setPositionAlt(double)));
     connect(this, SIGNAL(setStepperAzi(double)), mWorker, SLOT(setPositionAzi(double)));
 
-    mWorker->start();
+
 
 }
 
@@ -52,7 +53,7 @@ void MotorDriver::startDriver()
 }
 void MotorDriver::stopDriver()
 {
-    mWorker->disableSteppers(true);
+    //mWorker->disableSteppers(true);
 }
 
 void MotorDriver::pauseDriver(bool val)
@@ -76,14 +77,33 @@ void MotorDriver::setTargetAzimuth (double val)
 
 void MotorDriver::updateAltitudeStepperTarget()
 {
-    double currentStepTargetDiff = (targetAltitude + manualAltitudeCorrection - currAltitude) / degPerStepAlt;
+    double currentStepTargetDiff = 0.0;
+    if ((targetAltitude + manualAltitudeCorrection) > currAltitude)
+    {
+        currentStepTargetDiff = (targetAltitude + manualAltitudeCorrection + altHyster - currAltitude) / degPerStepAlt;
+    }
+    else
+    {
+        currentStepTargetDiff = (targetAltitude + manualAltitudeCorrection - altHyster - currAltitude) / degPerStepAlt;
+    }
+
     emit setStepperAlt(currentStepTargetDiff);
     //qDebug() << "Altitude Target Step" << currentStepTargetDiff;
 }
 
 void MotorDriver::updateAzimuthStepperTarget()
 {
-    double currentStepTargetDiff = (targetAzimuth + manualAzimuthCorrection - currAzimuth) / degPerStepAzi;
+    double currentStepTargetDiff = 0.0;
+
+    if ((targetAzimuth + manualAzimuthCorrection) > currAzimuth)
+    {
+        currentStepTargetDiff = (targetAzimuth + manualAzimuthCorrection + aziHyster - currAzimuth) / degPerStepAzi;
+    }
+    else
+    {
+       currentStepTargetDiff = (targetAzimuth + manualAzimuthCorrection - aziHyster - currAzimuth) / degPerStepAzi;
+    }
+
     emit setStepperAzi(currentStepTargetDiff);
     //qDebug() << "Azimuth Target Step" << currentStepTargetDiff;
 }
@@ -99,47 +119,37 @@ void MotorDriver::setCurrAzimuth (double val)
 void MotorDriver::setDegPerStepAzi(double val)
 {
     degPerStepAzi = val;
-    qDebug() << "degPerStepAzi" << degPerStepAzi;
+    qDebug() << "Degs per Step Azimuth: " << degPerStepAzi;
 }
 void MotorDriver::setDegPerStepAlt(double val)
 {
     degPerStepAlt = val;
-    qDebug() << "degPerStepAlt" << degPerStepAlt;
+    qDebug() << "Degs per Step Altitude: " << degPerStepAlt;
 }
 
 void MotorDriver::setHysterAzi(double val)
 {
     aziHyster = val / 100 * degPerStepAzi;
+    qDebug() << "Azimuth hysteresis: " << aziHyster;
 }
 void MotorDriver::setHysterAlt(double val)
 {
     altHyster = val / 100 * degPerStepAlt;
+   qDebug() << "Altitude hysteresis: " << altHyster;
 }
 
 
 
 void MotorDriver::setFastDecay(bool val)
 {
-    qDebug() << "Fast decay:" << val;
-    if (val)
-    {
-        #ifdef RASPBERRYPI
-        //digitalWrite(decPin, HIGH);
-        #endif
-    }
-    else
-    {
-        #ifdef RASPBERRYPI
-        //digitalWrite(decPin, LOW);
-        #endif
-    }
+    mWorker->setFastDecay(val);
 }
 
 void MotorDriver::altMoveStep(double val)
 {
     manualAltitudeCorrection += (val * degPerStepAlt);
-    //qDebug() << "manualAltitudeCorrection" << manualAltitudeCorrection;
     updateAltitudeStepperTarget();
+    emit showManualAltCorr(manualAltitudeCorrection);
 }
 
 
@@ -147,6 +157,7 @@ void MotorDriver::aziMoveStep(double val)
 {
     manualAzimuthCorrection += (val * degPerStepAzi);
     updateAzimuthStepperTarget();
+    emit showManualAziCorr(manualAzimuthCorrection);
 }
 
 void MotorDriver::setSpeedAzi(int val)
