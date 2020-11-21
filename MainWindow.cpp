@@ -57,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(prefsdialog, SIGNAL(setSpeedAlt(int)), motordriver, SLOT(setSpeedAlt(int)));
     connect(prefsdialog, SIGNAL(setSpeedAzi(int)), gamepadin, SLOT(setSpeedAzi(int)));
     connect(prefsdialog, SIGNAL(setSpeedAlt(int)), gamepadin, SLOT(setSpeedAlt(int)));
+    connect(prefsdialog, SIGNAL(setDpadStepSize(double)), gamepadin, SLOT(setStepMul(double)));
 
     connect(prefsdialog, SIGNAL(setHysterAzi(double)), motordriver, SLOT(setHysterAzi(double)));
     connect(prefsdialog, SIGNAL(setHysterAlt(double)), motordriver, SLOT(setHysterAlt(double)));
@@ -92,8 +93,13 @@ MainWindow::MainWindow(QWidget *parent)
     ui->syncButton->setCheckable(true);
     ui->pauseButton->setCheckable(true);
     ui->powerDownButton->setCheckable(true);
+    ui->startStopButton->setCheckable(true);
 
     this->setWindowFlags(this->windowFlags() | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint); //don't allow to be hidden by Stellarium in window mode
+
+    startStopTimer = new QTimer;
+    startStopTimer->setInterval(startStopInterval);
+    connect(startStopTimer, SIGNAL(timeout()), this, SLOT(togglePosUpdate()));
 }
 
 void MainWindow::setAzimuth(double azimuth)
@@ -118,6 +124,27 @@ void MainWindow::setManAltCorr(double altitude)
     ui->labelManAlt->setNum(altManCorr-baseAltCorr);
 }
 
+void MainWindow::togglePosUpdate()
+{
+    if(updatePaused)
+    {
+        updatePaused = false;
+        connect(stelin, SIGNAL(sendAzimuthVal(double)), motordriver, SLOT(setTargetAzimuth(double)));
+        connect(stelin, SIGNAL(sendAltitudeVal(double)), motordriver, SLOT(setTargetAltitude(double)));
+        ui->startStopButton->setText("Start Stop mode enabled [R]");
+        startStopTimer->setInterval(1500); //make sure it is longer than Stellarium update timer (1000)
+    }
+    else
+    {
+        updatePaused = true;
+        disconnect(stelin, SIGNAL(sendAzimuthVal(double)), motordriver, SLOT(setTargetAzimuth(double)));
+        disconnect(stelin, SIGNAL(sendAltitudeVal(double)), motordriver, SLOT(setTargetAltitude(double)));
+        ui->startStopButton->setText("Start Stop mode enabled [S]");
+        startStopTimer->setInterval(startStopInterval);
+
+    }
+}
+
 
 MainWindow::~MainWindow()
 {
@@ -140,7 +167,6 @@ void MainWindow::on_syncButton_toggled(bool checked)
         connect(stelin, SIGNAL(sendAzimuthVal(double)), motordriver, SLOT(setTargetAzimuth(double)));
         connect(stelin, SIGNAL(sendAltitudeVal(double)), motordriver, SLOT(setTargetAltitude(double)));
 
-        motordriver->startDriver();
     }
     else
     {
@@ -148,8 +174,6 @@ void MainWindow::on_syncButton_toggled(bool checked)
         ui->pauseButton->setEnabled(false);
         disconnect(stelin, SIGNAL(sendAzimuthVal(double)), motordriver, SLOT(setTargetAzimuth(double)));
         disconnect(stelin, SIGNAL(sendAltitudeVal(double)), motordriver, SLOT(setTargetAltitude(double)));
-
-        motordriver->stopDriver();
     }
 
 
@@ -225,4 +249,31 @@ void MainWindow::on_resAltButton_clicked()
 {
     baseAltCorr = altManCorr;
     ui->labelManAlt->setNum(altManCorr-baseAltCorr);
+}
+
+void MainWindow::on_startStopButton_clicked(bool checked)
+{
+    if (checked)
+    {
+        ui->startStopButton->setText("Start Stop mode enabled");
+        updatePaused = true;
+        startStopTimer->setInterval(100); //enter the mode almost immediatelly
+        startStopTimer->start();
+    }
+    else
+    {
+       ui->startStopButton->setText("Start Stop mode disabled");
+       updatePaused = false;
+       startStopTimer->stop();
+       //make sure that interface is connected to driver after button uncheck
+       connect(stelin, SIGNAL(sendAzimuthVal(double)), motordriver, SLOT(setTargetAzimuth(double)));
+       connect(stelin, SIGNAL(sendAltitudeVal(double)), motordriver, SLOT(setTargetAltitude(double)));
+
+    }
+}
+
+void MainWindow::on_startStopIntervSlider_valueChanged(int value)
+{
+    startStopInterval = value * 1000;
+    ui->labelInterval->setText("Start Stop interval [s]: "+ QString::number(value));
 }

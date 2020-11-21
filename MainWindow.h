@@ -31,6 +31,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTimer>
 
 #include <StellarInterface.h>
 #include <GamepadInterface.h>
@@ -57,12 +58,15 @@ private:
     double baseAziCorr = 0.0;
     double altManCorr = 0.0;
     double aziManCorr = 0.0;
+    int startStopInterval = 10000;
+    bool updatePaused = false;
     Ui::MainWindow *ui;
     StellarInterface *stelin;
     GamepadInterface *gamepadin;
     MotorDriver *motordriver;
     SerialDriver *serialdriver;
     PrefsDialog *prefsdialog;
+    QTimer *startStopTimer;
 
 private slots:
     void setAzimuth (double azimuth);
@@ -74,6 +78,7 @@ private slots:
     void setTimeEdit(QTime time);
     void setDateEdit(QDate date);
     void setLocationEdit(QString location);
+    void togglePosUpdate();
 
     void on_syncButton_toggled(bool checked);
     void on_pauseButton_toggled(bool checked);
@@ -83,5 +88,7 @@ private slots:
     void on_powerDownButton_toggled(bool checked);
     void on_resAziButton_clicked();
     void on_resAltButton_clicked();
+    void on_startStopButton_clicked(bool checked);
+    void on_startStopIntervSlider_valueChanged(int value);
 };
 #endif // MAINWINDOW_H

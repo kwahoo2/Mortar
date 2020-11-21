@@ -69,10 +69,11 @@ private:
     double R2Val = 0.0, xAxisVal = 0.0, yAxisVal = 0.0;
     int poolInterval = 100;
     double deadzone = 0.1;
-    int altSpeed = 100, aziSpeed = 100; //these values should be syncronizsed with motordriver values
+    int altSpeed = 100, aziSpeed = 100; //these values should be syncronized with motordriver values
+    double dPadStepMul = 0.1;
 
     QGamepad *gamepad;
-    xdo_t * x;
+    xdo_t *x;
     QTimer *pollTimer;
 
 private slots:
@@ -88,6 +89,7 @@ private slots:
 public slots:
     void setSpeedAlt(int val);
     void setSpeedAzi(int val);
+    void setStepMul(double val);
 
 };
 

@@ -74,25 +74,25 @@ void GamepadInterface::leftPressed(bool val)
 {
      qDebug() << "Left" << val;
      if (val)
-        emit aziMoveStep(-1 * aziSpeed * (static_cast<double>(poolInterval) / 1000.0));
+        emit aziMoveStep(-dPadStepMul * aziSpeed * (static_cast<double>(poolInterval) / 1000.0));
 }
 void GamepadInterface::rightPressed(bool val)
 {
     qDebug() << "Right" << val;
     if (val)
-       emit aziMoveStep(1 * aziSpeed * (static_cast<double>(poolInterval) / 1000.0));
+       emit aziMoveStep(dPadStepMul * aziSpeed * (static_cast<double>(poolInterval) / 1000.0));
 }
 void GamepadInterface::upPressed(bool val)
 {
     qDebug() << "Up" << val;
     if (val)
-       emit altMoveStep(1 * altSpeed * (static_cast<double>(poolInterval) / 1000.0));
+       emit altMoveStep(dPadStepMul * altSpeed * (static_cast<double>(poolInterval) / 1000.0));
 }
 void GamepadInterface::downPressed(bool val)
 {
      qDebug() << "Down" << val;
      if (val)
-        emit altMoveStep(-1 * altSpeed * (static_cast<double>(poolInterval) / 1000.0));
+        emit altMoveStep(-dPadStepMul * altSpeed * (static_cast<double>(poolInterval) / 1000.0));
 }
 
 void GamepadInterface::R2Changed(double val)
@@ -111,6 +111,13 @@ void GamepadInterface::setSpeedAzi(int val)
     qDebug() << "Gamepad Azi speed set: " << val;
     aziSpeed = val;
 }
+
+void GamepadInterface::setStepMul(double val)
+{
+    qDebug() << "DPAD step multiplier set: " << val;
+     dPadStepMul = val;
+}
+
 
 
 void GamepadInterface::pollButtons()

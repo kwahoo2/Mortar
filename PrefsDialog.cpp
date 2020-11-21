@@ -112,6 +112,14 @@ void PrefsDialog::loadSettings()
         emit setFastDecay(decay);
     }
 
+    if (settings.contains("Common/dpadstepsize"))
+    {
+        double stepSize =  settings.value("Common/dpadstepsize").toDouble();
+        ui->dpadStepSpinBox->setValue(stepSize);
+        emit setDpadStepSize(stepSize);
+
+    }
+
     if (settings.contains("Stellarium/telescope"))
     {
         telescopeName = settings.value("Stellarium/telescope").toString();
@@ -265,3 +273,9 @@ void PrefsDialog::on_decayCheckBox_toggled(bool checked)
 
 
 
+
+void PrefsDialog::on_dpadStepSpinBox_valueChanged(double arg1)
+{
+    settings.setValue("Common/dpadstepsize", arg1);
+    emit setDpadStepSize(arg1);
+}

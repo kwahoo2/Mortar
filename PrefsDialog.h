@@ -66,6 +66,7 @@ signals:
     void changeStellHost(QString str);
     void givePortSelection(QString portsel);
     void setFastDecay(bool val);
+    void setDpadStepSize(double val);
 
 
 
@@ -84,8 +85,7 @@ private slots:
     void on_telescopeLineEdit_textChanged(const QString &arg1);
     void on_portsComboBox_activated(const QString &arg1);
     void on_decayCheckBox_toggled(bool checked);
-
-
+    void on_dpadStepSpinBox_valueChanged(double arg1);
 
 private:
     double stepsPerMotorRotatAzi, stepsPerMotorRotatAlt;

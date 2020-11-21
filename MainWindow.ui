@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>577</width>
-    <height>407</height>
+    <height>469</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -193,6 +193,42 @@
        <widget class="QPushButton" name="resAltButton">
         <property name="text">
          <string>Reset Counter</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2">
+       <widget class="QPushButton" name="startStopButton">
+        <property name="text">
+         <string>Start Stop mode disabled</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="3">
+       <widget class="QSlider" name="startStopIntervSlider">
+        <property name="minimum">
+         <number>10</number>
+        </property>
+        <property name="maximum">
+         <number>60</number>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="tickPosition">
+         <enum>QSlider::TicksAbove</enum>
+        </property>
+        <property name="tickInterval">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3">
+       <widget class="QLabel" name="labelInterval">
+        <property name="text">
+         <string>Start Stop interval [s]: 10</string>
         </property>
        </widget>
       </item>

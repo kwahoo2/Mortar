@@ -53,7 +53,7 @@ void MotorDriver::startDriver()
 }
 void MotorDriver::stopDriver()
 {
-    //mWorker->disableSteppers(true);
+    mWorker->disableSteppers(true);
 }
 
 void MotorDriver::pauseDriver(bool val)
