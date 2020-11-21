@@ -36,7 +36,7 @@ Both drivers:
 
     Decay: GPIO 22, physical pin 15
     xI0: GPIO17, physical pin 11, current regulation
-    xI1Pin: GPIO27, physical pin 13
+    xI1: GPIO27, physical pin 13
     
 Altitude driver:
 
@@ -119,3 +119,5 @@ wiringpi-legacy branch contains a deprecated implementation using WiringPi inste
 ## License
 
 Check [LICENSE](LICENSE) for details.
+
+Mortar uses parts of [pigpio-cpp](https://github.com/skyformat99/pigpio-cpp) licensed on [Unlicense License.](pigpio-cpp-LICENSE) 
