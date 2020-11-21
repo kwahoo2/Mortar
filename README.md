@@ -3,12 +3,16 @@ Mortar is a software to drive an altazimuth mounted (eg. dobsonian) telescope us
 
 ## Background
 
+I wanted to make a simple to use interface to drive a dobsonian telescope. It should use original mount, common electronics and 3D-printed parts. It should not need extensive calibration (eg. searching Polaris). It should not need doing conversion between equatorial and altazimuth coordinates.  
+
+[![Dobsonian telescope driven by Mortar](https://img.youtube.com/vi/ajDmgW0s_2s/0.jpg)](https://www.youtube.com/watch?v=ajDmgW0s_2s)
 
 ## Prerequisites
 
 ### Software Dependencies
 
 * Stellarium
+* pigpio library
 * Qt and qmake
 * Qt serialport module
 * Qt gamepad module
@@ -17,12 +21,37 @@ Mortar is a software to drive an altazimuth mounted (eg. dobsonian) telescope us
 
 ### Hardware
 
-* Rasperry Pi
-* Two stepper motors
-* Stepper motor drivers (DRV8814 or L298)
+* Altzimuth telescope
+* 3D-printed parts and bearings - see mechanical/teleskop.FCStd Parts are made with [FreeCAD Assembly3 branch.](https://github.com/realthunder/FreeCAD_assembly3/releases)
+* Raspberry Pi
+* Two bipolar stepper motors
+* Two stepper motor drivers DRV8814 (L298 is deprecated in master, see wiringpi-legacy branch)
 * Gamepad
 * (Optional) GPS module
 * (Optional) touch screen
+
+Pins for DRV8814 drivers are described in MotorWorker.cpp
+
+Both drivers:
+
+    Decay: GPIO 22, physical pin 15
+    xI0: GPIO17, physical pin 11, current regulation
+    xI1Pin: GPIO27, physical pin 13
+    
+Altitude driver:
+
+    AENBL: GPIO 4, physical pin 7
+    APHASE: GPIO 5, physical pin 29
+    BENBL: GPIO 18, physical pin 12
+    BPHASE: GPIO 6, physical pin 31
+    
+Azimuth driver:
+
+    AENBL: GPIO 20, physical pin 38
+    PHASE: GPIO 12, physical pin 32
+    BENBL: GPIO 21, physical pin 21
+    BPHASE: GPIO 26, physical pin 37
+
 
 ## Installation and Usage
 
@@ -32,7 +61,16 @@ If you want use GPS, enable UART in the rpi-config utility.
 
 [uart]: https://raw.githubusercontent.com/kwahoo2/Mortar/master/.github/images/rpi-config.png "Raspberry UART setup" 
 
-Download and compile the software.
+Download and compile the [pigpio](http://abyz.me.uk/rpi/pigpio/index.html) library.
+
+```
+git clone  https://github.com/joan2937/pigpio.git
+cd pigpio
+make
+sudo make install
+```
+
+Download and compile and run the software.
 
 ```
 sudo apt install qt5-default libqt5gamepad5-dev libqt5serialport5-dev libxdo-dev
@@ -58,7 +96,7 @@ In the Mortar open the preferences and set the telescope name from Stellarium. I
 
 [prefs]: https://raw.githubusercontent.com/kwahoo2/Mortar/master/.github/images/remote.png "Mortar preferences" 
 
-You may use a gamepad to move your telescope. Analog stick works as coarse adjustment, dpad moves a stepper motor by a single step. R2 button emulates F11, and it is useful for Stellarium fullscreen toggle.
+You may use a gamepad to move your telescope. Analog stick works as coarse adjustment, dpad moves a stepper motor by a small (size is adjustable in options) step. R2 button emulates F11, and it is useful for Stellarium fullscreen toggle.
 
 ## Telescope calibration and observation
 
@@ -70,12 +108,12 @@ You may use a gamepad to move your telescope. Analog stick works as coarse adjus
 
 4. Click "Sync with Stellarium". Both programs are synced now. Real telescope will follow the virtual one.
 
+5. While Mortar supports fine microstepping, constant movement may introduce vibrations. To prevent this a "Start Stop mode" is availabe. When enabled Mortat will move the telescope in predefined intervals.
 
-### Raspberry Pi4 and WiringPi
 
-If you use Raspberry Pi4 you may encounter issues. Check for working version of WiringPi libraries:
-http://wiringpi.com/wiringpi-updated-to-2-52-for-the-raspberry-pi-4b/
+### WiringPi legacy brach
 
+wiringpi-legacy branch contains a deprecated implementation using WiringPi instead of pigpio. That brach supports full-step operation only. 
 
 
 ## License
