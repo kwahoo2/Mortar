@@ -33,6 +33,7 @@ I wanted to make a simple to use interface to drive a dobsonian telescope. It sh
 An integrated shield board for Raspberry Pi is available in a separate repository [MortarShield.](https://github.com/twizzter/MortarShield/)
 
 ![Mortar Shield](https://github.com/twizzter/MortarShield/blob/main/ms11.png?raw=true)
+It can be cloned as submodule for this repository.
 
 Pins for DRV8814 drivers are described in MotorWorker.cpp
 
@@ -68,7 +69,7 @@ If you want use GPS, enable UART in the rpi-config utility.
 Download and compile the [pigpio](http://abyz.me.uk/rpi/pigpio/index.html) library.
 
 ```
-git clone  https://github.com/joan2937/pigpio.git
+git clone https://github.com/joan2937/pigpio.git
 cd pigpio
 make
 sudo make install
@@ -78,7 +79,7 @@ Download and compile and run the software.
 
 ```
 sudo apt install qt5-default libqt5gamepad5-dev libqt5serialport5-dev libxdo-dev
-git clone https://github.com/kwahoo2/Mortar 
+git clone --recurse-submodules https://github.com/kwahoo2/Mortar 
 cd Mortar
 qmake -makefile -o Makefile Mortar.pro
 make

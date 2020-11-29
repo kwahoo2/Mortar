@@ -1,0 +1,3 @@
+[submodule "MortarShield"]
+	path = MortarShield
+	url = https://github.com/twizzter/MortarShield.git
