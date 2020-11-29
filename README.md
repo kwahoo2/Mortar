@@ -30,6 +30,10 @@ I wanted to make a simple to use interface to drive a dobsonian telescope. It sh
 * (Optional) GPS module
 * (Optional) touch screen
 
+An integrated shield board for Raspberry Pi is available in a separate repository [MortarShield.](https://github.com/twizzter/MortarShield/)
+
+![Mortar Shield](https://github.com/twizzter/MortarShield/blob/main/ms11.png?raw=true)
+
 Pins for DRV8814 drivers are described in MotorWorker.cpp
 
 Both drivers:
