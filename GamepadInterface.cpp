@@ -144,9 +144,6 @@ void GamepadInterface::pollButtons()
 }
 
 
-
-
-
 GamepadInterface::~GamepadInterface()
 {
     delete x;

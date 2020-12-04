@@ -40,9 +40,9 @@ MainWindow::MainWindow(QWidget *parent)
     gamepadin = new GamepadInterface(this);
     prefsdialog = new PrefsDialog(this); //dialog with options
     prefsdialog->setModal(false);
+    corrtable = new CorrectionTable(this); //dialog for correction values
+    corrtable->setModal(false);
 
-    connect(stelin, SIGNAL(sendAzimuthVal(double)), this, SLOT(setAzimuth(double)));
-    connect(stelin, SIGNAL(sendAltitudeVal(double)), this, SLOT(setAltitude(double)));
     connect(stelin, SIGNAL(sendTime(QTime)), this, SLOT(setTimeEdit(QTime)));
     connect(stelin, SIGNAL(sendDate(QDate)), this, SLOT(setDateEdit(QDate)));
     connect(stelin, SIGNAL(sendLocationstr(QString)), this, SLOT(setLocationEdit(QString)));
@@ -76,6 +76,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(motordriver, SIGNAL(showManualAziCorr(double)), this, SLOT(setManAziCorr(double)));
     connect(motordriver, SIGNAL(showManualAltCorr(double)), this, SLOT(setManAltCorr(double)));
+    connect(stelin, SIGNAL(sendAzimuthVal(double)), corrtable, SLOT(setCurrAzi(double)));
+    connect(stelin, SIGNAL(sendAltitudeVal(double)), corrtable, SLOT(setCurrAlt(double)));
+    connect(motordriver, SIGNAL(showManualAziCorr(double)), corrtable, SLOT(setCurrAziCorr(double)));
+    connect(motordriver, SIGNAL(showManualAltCorr(double)), corrtable, SLOT(setCurrAltCorr(double)));
+    connect(corrtable, SIGNAL(sendCorrectedAzi(double)), this, SLOT(setAzimuth(double)));
+    connect(corrtable, SIGNAL(sendCorrectedAlt(double)), this, SLOT(setAltitude(double)));
+
+    connect(corrtable, SIGNAL(alignAlt(double)), this, SLOT(alignCurrTargetAlt(double)));
+    connect(corrtable, SIGNAL(alignAzi(double)), this, SLOT(alignCurrTargetAzi(double)));
 
     serialdriver->refreshPorts();
     prefsdialog->loadSettings();
@@ -129,16 +138,14 @@ void MainWindow::togglePosUpdate()
     if(updatePaused)
     {
         updatePaused = false;
-        connect(stelin, SIGNAL(sendAzimuthVal(double)), motordriver, SLOT(setTargetAzimuth(double)));
-        connect(stelin, SIGNAL(sendAltitudeVal(double)), motordriver, SLOT(setTargetAltitude(double)));
+        enableMotorDriverConnection();
         ui->startStopButton->setText("Start Stop mode enabled [R]");
         startStopTimer->setInterval(1500); //make sure it is longer than Stellarium update timer (1000)
     }
     else
     {
         updatePaused = true;
-        disconnect(stelin, SIGNAL(sendAzimuthVal(double)), motordriver, SLOT(setTargetAzimuth(double)));
-        disconnect(stelin, SIGNAL(sendAltitudeVal(double)), motordriver, SLOT(setTargetAltitude(double)));
+        disableMotorDriverConnection();
         ui->startStopButton->setText("Start Stop mode enabled [S]");
         startStopTimer->setInterval(startStopInterval);
 
@@ -159,24 +166,31 @@ void MainWindow::on_syncButton_toggled(bool checked)
     {
         ui->syncButton->setText("Sync active");
         ui->pauseButton->setEnabled(true);
-        motordriver->setCurrAzimuth(currAzimuth);
-        motordriver->setCurrAltitude(currAltitude);
-        motordriver->setTargetAzimuth(currAzimuth);
-        motordriver->setTargetAltitude(currAltitude);
+        alignCurrTargetAlt(currAltitude);
+        alignCurrTargetAzi(currAzimuth);
 
-        connect(stelin, SIGNAL(sendAzimuthVal(double)), motordriver, SLOT(setTargetAzimuth(double)));
-        connect(stelin, SIGNAL(sendAltitudeVal(double)), motordriver, SLOT(setTargetAltitude(double)));
+        enableMotorDriverConnection();
 
     }
     else
     {
         ui->syncButton->setText("Sync with Stellarium");
         ui->pauseButton->setEnabled(false);
-        disconnect(stelin, SIGNAL(sendAzimuthVal(double)), motordriver, SLOT(setTargetAzimuth(double)));
-        disconnect(stelin, SIGNAL(sendAltitudeVal(double)), motordriver, SLOT(setTargetAltitude(double)));
+        disableMotorDriverConnection();
     }
 
 
+}
+
+void MainWindow::alignCurrTargetAlt(double alt) //Used when starting point is set
+{
+        motordriver->setCurrAltitude(alt);
+        motordriver->setTargetAltitude(alt);
+}
+void MainWindow::alignCurrTargetAzi(double azi)
+{
+       motordriver->setCurrAzimuth(azi);
+       motordriver->setTargetAzimuth(azi);
 }
 
 void MainWindow::on_pauseButton_toggled(bool checked)
@@ -197,6 +211,14 @@ void MainWindow::on_actionMotor_Preferences_triggered()
 {
     prefsdialog->show();
 }
+
+void MainWindow::on_actionCorrection_values_triggered()
+{
+    corrtable->show();
+    enableMotorDriverConnection(); //make sure motors are syncronised during calibration
+    ui->syncButton->setChecked(true);
+}
+
 
 void MainWindow::askForSerial()
 {
@@ -266,8 +288,7 @@ void MainWindow::on_startStopButton_clicked(bool checked)
        updatePaused = false;
        startStopTimer->stop();
        //make sure that interface is connected to driver after button uncheck
-       connect(stelin, SIGNAL(sendAzimuthVal(double)), motordriver, SLOT(setTargetAzimuth(double)));
-       connect(stelin, SIGNAL(sendAltitudeVal(double)), motordriver, SLOT(setTargetAltitude(double)));
+        enableMotorDriverConnection();
 
     }
 }
@@ -276,4 +297,18 @@ void MainWindow::on_startStopIntervSlider_valueChanged(int value)
 {
     startStopInterval = value * 1000;
     ui->labelInterval->setText("Start Stop interval [s]: "+ QString::number(value));
+}
+
+
+
+void MainWindow::enableMotorDriverConnection()
+{
+    connect(corrtable, SIGNAL(sendCorrectedAzi(double)), motordriver, SLOT(setTargetAzimuth(double)));
+    connect(corrtable, SIGNAL(sendCorrectedAlt(double)), motordriver, SLOT(setTargetAltitude(double)));
+
+}
+void MainWindow::disableMotorDriverConnection()
+{
+    disconnect(corrtable, SIGNAL(sendCorrectedAzi(double)), motordriver, SLOT(setTargetAzimuth(double)));
+    disconnect(corrtable, SIGNAL(sendCorrectedAlt(double)), motordriver, SLOT(setTargetAltitude(double)));
 }

@@ -1,4 +1,4 @@
-QT       += core gui network gamepad
+QT       += core gui network gamepad charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport
 
@@ -16,6 +16,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    CorrectionTable.cpp \
     GamepadInterface.cpp \
     MotorDriver.cpp \
     MotorWorker.cpp \
@@ -26,6 +27,7 @@ SOURCES += \
     MainWindow.cpp
 
 HEADERS += \
+    CorrectionTable.h \
     GamepadInterface.h \
     MainWindow.h \
     MotorDriver.h \
@@ -35,6 +37,7 @@ HEADERS += \
     StellarInterface.h
 
 FORMS += \
+    CorrectionTable.ui \
     MainWindow.ui \
     PrefsDialog.ui
 

@@ -16,6 +16,7 @@ I wanted to make a simple to use interface to drive a dobsonian telescope. It sh
 * Qt and qmake
 * Qt serialport module
 * Qt gamepad module
+* Qt charts module
 * xdo3 library
 
 
@@ -78,7 +79,7 @@ sudo make install
 Download and compile and run the software.
 
 ```
-sudo apt install qt5-default libqt5gamepad5-dev libqt5serialport5-dev libxdo-dev
+sudo apt install qt5-default libqt5gamepad5-dev libqt5serialport5-dev libqt5-charts5-dev libxdo-dev
 git clone --recurse-submodules https://github.com/kwahoo2/Mortar 
 cd Mortar
 qmake -makefile -o Makefile Mortar.pro

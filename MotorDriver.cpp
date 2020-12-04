@@ -43,8 +43,6 @@ MotorDriver::MotorDriver(QObject *parent) : QObject(parent)
     connect(this, SIGNAL(setStepperAlt(double)), mWorker, SLOT(setPositionAlt(double)));
     connect(this, SIGNAL(setStepperAzi(double)), mWorker, SLOT(setPositionAzi(double)));
 
-
-
 }
 
 void MotorDriver::startDriver()

@@ -38,6 +38,7 @@
 #include <MotorDriver.h>
 #include <SerialDriver.h>
 #include <PrefsDialog.h>
+#include <CorrectionTable.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -66,13 +67,21 @@ private:
     MotorDriver *motordriver;
     SerialDriver *serialdriver;
     PrefsDialog *prefsdialog;
+    CorrectionTable *corrtable;
     QTimer *startStopTimer;
 
+    void enableMotorDriverConnection();
+    void disableMotorDriverConnection();
+
 private slots:
+
     void setAzimuth (double azimuth);
     void setAltitude (double altitude);
     void setManAziCorr(double azimuth);
     void setManAltCorr(double altitude);
+
+    void alignCurrTargetAlt(double alt);
+    void alignCurrTargetAzi(double azi);
 
     void askForSerial();
     void setTimeEdit(QTime time);
@@ -90,5 +99,6 @@ private slots:
     void on_resAltButton_clicked();
     void on_startStopButton_clicked(bool checked);
     void on_startStopIntervSlider_valueChanged(int value);
+    void on_actionCorrection_values_triggered();
 };
 #endif // MAINWINDOW_H
