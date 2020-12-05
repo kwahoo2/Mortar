@@ -100,5 +100,6 @@ private slots:
     void on_startStopButton_clicked(bool checked);
     void on_startStopIntervSlider_valueChanged(int value);
     void on_actionCorrection_values_triggered();
+    void on_shutterModeButton_toggled(bool checked);
 };
 #endif // MAINWINDOW_H

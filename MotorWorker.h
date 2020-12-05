@@ -57,7 +57,7 @@ public:
     void setHoldPWM(int val);
     void setRunPWM(int val);
     void setFastDecay(bool val);
-
+    void enableShutterMode(bool val);
 
 public slots:
     void setPositionAlt(double pos);
@@ -81,6 +81,8 @@ private:
     double maxSpeedAzi = 100.0;
     double allowedError = 0.05;
     bool limitPower = true;
+    bool shutterPressAllowed = false;
+    bool shutterModeEnabled = false;
     double runPower = 0.4;
     double holdPower = 0.2;
     bool steppersDisabled = false;

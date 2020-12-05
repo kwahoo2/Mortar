@@ -59,6 +59,8 @@ void MotorWorker::run()
     pigpio_wcpp::PWM bEnblPinPWMAzi = pigpio_wcpp::PWM(21); //GPIO 21, physical pin 21
     pigpio_wcpp::DigitalOutput bPhPinAzi = pigpio_wcpp::DigitalOutput(26);  //GPIO 26, physical pin 37
 
+    pigpio_wcpp::DigitalOutput shutterPin = pigpio_wcpp::DigitalOutput(25);  //GPIO 25, physical pin 22
+
     xI0Pin.low();
     xI1Pin.low();
     decPin.low();
@@ -66,6 +68,7 @@ void MotorWorker::run()
     bPhPinAlt.low();
     aPhPinAzi.low();
     bPhPinAzi.low();
+    shutterPin.low();
 
     aEnblPinPWMAlt.setFrequency(40000);
     aEnblPinPWMAlt.setRange(pigpio_wcpp::PWMRange(pwmRange));
@@ -107,6 +110,16 @@ void MotorWorker::run()
 #ifdef RASPBERRYPI
         if (!steppersDisabled)
         {
+
+            if (shutterModeEnabled && shutterPressAllowed) //shutterMode isderived from user's decision, shutterPressAlowed is derived from motors state
+            {
+                shutterPin.high();
+            }
+            else
+            {
+                shutterPin.low();
+            }
+
             aEnblPinPWMAlt.drive(static_cast<uint>(round(aPWMAlt * pwmRange)));
             bEnblPinPWMAlt.drive(static_cast<uint>(round(bPWMAlt * pwmRange)));
 
@@ -254,10 +267,12 @@ void MotorWorker::calcPinsValues(double targetPos, double &actPos,
     double powerLimit = 1.0;
     if (limitPower)
     {
+        shutterPressAllowed = true; //allowe shutter press only when stationary
         powerLimit = holdPower;
     }
     else
     {
+        shutterPressAllowed = false;
         powerLimit = runPower;
     }
 
@@ -311,5 +326,11 @@ void MotorWorker::setFastDecay(bool val)
     qDebug() << "Fast decay:" << val;
     fastDecay = val;
 }
+
+void MotorWorker::enableShutterMode(bool val)
+{
+    shutterModeEnabled = val;
+}
+
 
 

@@ -36,19 +36,6 @@
       <property name="sizeConstraint">
        <enum>QLayout::SetMinAndMaxSize</enum>
       </property>
-      <item row="9" column="1">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
       <item row="9" column="2">
        <widget class="QPushButton" name="syncGPSButton">
         <property name="text">
@@ -231,6 +218,26 @@
          <string>GPS date</string>
         </property>
        </widget>
+      </item>
+      <item row="6" column="3">
+       <widget class="QPushButton" name="shutterModeButton">
+        <property name="text">
+         <string>Enable shutter mode</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>

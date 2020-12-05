@@ -103,6 +103,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pauseButton->setCheckable(true);
     ui->powerDownButton->setCheckable(true);
     ui->startStopButton->setCheckable(true);
+    ui->shutterModeButton->setCheckable(true);
 
     this->setWindowFlags(this->windowFlags() | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint); //don't allow to be hidden by Stellarium in window mode
 
@@ -311,4 +312,18 @@ void MainWindow::disableMotorDriverConnection()
 {
     disconnect(corrtable, SIGNAL(sendCorrectedAzi(double)), motordriver, SLOT(setTargetAzimuth(double)));
     disconnect(corrtable, SIGNAL(sendCorrectedAlt(double)), motordriver, SLOT(setTargetAltitude(double)));
+}
+
+void MainWindow::on_shutterModeButton_toggled(bool checked)
+{
+    if (checked)
+    {
+        ui->shutterModeButton->setText("Shutter mode enabled");
+        motordriver->enableShutterMode(true);
+    }
+    else
+    {
+        ui->shutterModeButton->setText("Enable shutter mode");
+        motordriver->enableShutterMode(false);
+    }
 }

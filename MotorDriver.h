@@ -70,6 +70,7 @@ public:
     void startDriver();
     void stopDriver();
     void pauseDriver(bool val);
+    void enableShutterMode(bool val);
 
 public slots:
     void setTargetAltitude (double val);

@@ -177,6 +177,11 @@ void MotorDriver::setRunPWM(int val)
     mWorker->setRunPWM(val);
 }
 
+void MotorDriver::enableShutterMode(bool val)
+{
+    mWorker->enableShutterMode(val);
+}
+
 
 MotorDriver::~MotorDriver()
 {
