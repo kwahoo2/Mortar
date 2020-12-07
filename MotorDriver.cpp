@@ -137,12 +137,20 @@ void MotorDriver::setHysterAlt(double val)
 }
 
 
-
+/*Fast Decay is DRV8814 specific
+ * In fast decay mode, once the PWM chopping current level has been reached, the H-bridge reverses state to
+*allow winding current to flow in a reverse direction. As the winding current approaches zero, the bridge is
+*disabled to prevent any reverse current flow.
+*In slow decay mode, winding current is re-circulated by enabling both of the low-side FETs in the bridge.
+ */
 void MotorDriver::setFastDecay(bool val)
 {
     mWorker->setFastDecay(val);
 }
 
+
+/*altMoveStep is incremental used eg for gamepad input
+setManualAltiduteCorrection is absolute*/
 void MotorDriver::altMoveStep(double val)
 {
     manualAltitudeCorrection += (val * degPerStepAlt);
@@ -155,6 +163,18 @@ void MotorDriver::aziMoveStep(double val)
 {
     manualAzimuthCorrection += (val * degPerStepAzi);
     updateAzimuthStepperTarget();
+    emit showManualAziCorr(manualAzimuthCorrection);
+}
+
+void MotorDriver::setManualAltCorr (double val)
+{
+    manualAltitudeCorrection = val;
+    emit showManualAltCorr(manualAltitudeCorrection);
+}
+
+void MotorDriver::setManualAziCorr (double val)
+{
+    manualAzimuthCorrection = val;
     emit showManualAziCorr(manualAzimuthCorrection);
 }
 

@@ -24,11 +24,10 @@ void CorrectionTable::on_addCorrButton_clicked()
 {
     double correctedAlt, correctedAzi;
 
+    /*currAltCorr is just a manual correction value, not stellarium + manual
+    baseAlt is CurrAltCorr base for table creation*/
     correctedAlt = currAlt - baseAlt + currAltCorr;
     correctedAzi = currAzi - baseAzi + currAziCorr;
-
-    emit alignAlt(correctedAlt); //align current and target values to avoid movement when point is added
-    emit alignAzi(correctedAzi);
 
     for (ulong i = 0; i < altCorrVect.size(); ++i)
     {
@@ -62,6 +61,12 @@ void CorrectionTable::on_addCorrButton_clicked()
     std::sort(aziCorrVect.begin(), aziCorrVect.end());
 
     updateTableChart();
+    calculateCorrAlt(correctedAlt); //send new data to moto driver after adding point
+    calculateCorrAzi(correctedAzi);
+
+
+    //emit sendManualAltCorr(TODO); //sets manual value to prevent motor movement
+    //emit sendManualAziCorr(TODO);
 }
 
 
@@ -98,9 +103,10 @@ void CorrectionTable::calculateCorrAlt (double alt)
             altCorr0 = altCorrVect.at(i).second;
             altCorr1 = altCorrVect.at(i + 1).second;
 
-            double altCorrected = alt * (altCorr1 - altCorr0) / (alt1 - alt0);
+            double altCorrected = alt * (altCorr1 - altCorr0) / (alt1 - alt0) + (alt1 * altCorr0 - alt0 * altCorr1) / (alt1 - alt0);
             ui->corrAltLabel->setNum(altCorrected);
             emit sendCorrectedAlt(altCorrected);
+
         }
     }
 }
@@ -116,7 +122,8 @@ void CorrectionTable::calculateCorrAzi(double azi)
             aziCorr0 = aziCorrVect.at(i).second;
             aziCorr1 = aziCorrVect.at(i + 1).second;
 
-            double aziCorrected = azi * (aziCorr1 - aziCorr0) / (azi1 - azi0);
+            double aziCorrected = azi * (aziCorr1 - aziCorr0) / (azi1 - azi0) + (azi1 * aziCorr0 - azi0 * aziCorr1) / (azi1 - azi0);
+           // qDebug() << "Azi0" << azi0 << "Azi1" << azi1 << "aziC0" << aziCorr0 << "aziC1" << aziCorr1 << "azi" << azi << "aziCorrected" << aziCorrected;
             ui->corrAziLabel->setNum(aziCorrected);
             emit sendCorrectedAzi(aziCorrected);
 

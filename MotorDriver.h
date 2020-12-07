@@ -82,6 +82,8 @@ public slots:
 
     void aziMoveStep(double val);
     void altMoveStep(double val);
+    void setManualAltCorr (double val);
+    void setManualAziCorr (double val);
 
     void setDegPerStepAzi(double val);
     void setDegPerStepAlt(double val);

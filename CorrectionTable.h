@@ -53,9 +53,8 @@ private:
 signals:
     void sendCorrectedAlt (double altCorr);
     void sendCorrectedAzi (double aziCorr);
-
-    void alignAlt (double alt);
-    void alignAzi (double azi);
+    void sendManualAltCorr (double alt);
+    void sendManualAziCorr (double azi);
 };
 
 #endif // CORRECTIONTABLE_H
