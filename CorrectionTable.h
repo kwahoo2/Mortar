@@ -40,8 +40,13 @@ private:
     double currAzi = 0.0;
     double currAltCorr = 0.0;
     double currAziCorr = 0.0;
+    double corrFromTableAlt = 0.0;
+    double corrFromTableAzi = 0.0;
 
     double pointsMinDist = 2.0;
+
+    bool wasAltPointAdded = false;
+    bool wasAziPointAdded = false;
 
     void calculateCorrAlt (double alt);
     void calculateCorrAzi (double azi);
@@ -51,8 +56,8 @@ private:
 
 
 signals:
-    void sendCorrectedAlt (double altCorr);
-    void sendCorrectedAzi (double aziCorr);
+    void sendCorrectedAlt (double alt);
+    void sendCorrectedAzi (double azi);
     void sendManualAltCorr (double alt);
     void sendManualAziCorr (double azi);
 };

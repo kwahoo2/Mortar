@@ -25,9 +25,15 @@ void CorrectionTable::on_addCorrButton_clicked()
     double correctedAlt, correctedAzi;
 
     /*currAltCorr is just a manual correction value, not stellarium + manual
-    baseAlt is CurrAltCorr base for table creation*/
-    correctedAlt = currAlt - baseAlt + currAltCorr;
-    correctedAzi = currAzi - baseAzi + currAziCorr;
+    baseAlt is currAltCorr base for table creation
+    corrFromTableAlt is current correction value calculated from segmented (table).
+    It is added to avoid segment modicication is no new correction is added*/
+
+    double currAltBaseDiff = currAltCorr - baseAlt + corrFromTableAlt;
+    double currAziBaseDiff = currAziCorr - baseAzi + corrFromTableAzi;
+    correctedAlt = currAlt + currAltBaseDiff;//
+    correctedAzi = currAzi + currAziBaseDiff;
+
 
     for (ulong i = 0; i < altCorrVect.size(); ++i)
     {
@@ -61,12 +67,8 @@ void CorrectionTable::on_addCorrButton_clicked()
     std::sort(aziCorrVect.begin(), aziCorrVect.end());
 
     updateTableChart();
-    calculateCorrAlt(correctedAlt); //send new data to moto driver after adding point
-    calculateCorrAzi(correctedAzi);
-
-
-    //emit sendManualAltCorr(TODO); //sets manual value to prevent motor movement
-    //emit sendManualAziCorr(TODO);
+    wasAltPointAdded = true;
+    wasAziPointAdded = true;
 }
 
 
@@ -105,8 +107,13 @@ void CorrectionTable::calculateCorrAlt (double alt)
 
             double altCorrected = alt * (altCorr1 - altCorr0) / (alt1 - alt0) + (alt1 * altCorr0 - alt0 * altCorr1) / (alt1 - alt0);
             ui->corrAltLabel->setNum(altCorrected);
+            corrFromTableAlt = altCorrected - alt;
+            if (wasAltPointAdded) //reset manual correction to base position after modication if segmented
+            {
+                wasAltPointAdded = false; //do it only once to allow new corrections
+                emit sendManualAltCorr(baseAlt); //this have to be send vedore altCorrected
+            }
             emit sendCorrectedAlt(altCorrected);
-
         }
     }
 }
@@ -123,10 +130,14 @@ void CorrectionTable::calculateCorrAzi(double azi)
             aziCorr1 = aziCorrVect.at(i + 1).second;
 
             double aziCorrected = azi * (aziCorr1 - aziCorr0) / (azi1 - azi0) + (azi1 * aziCorr0 - azi0 * aziCorr1) / (azi1 - azi0);
-           // qDebug() << "Azi0" << azi0 << "Azi1" << azi1 << "aziC0" << aziCorr0 << "aziC1" << aziCorr1 << "azi" << azi << "aziCorrected" << aziCorrected;
             ui->corrAziLabel->setNum(aziCorrected);
+            corrFromTableAzi = aziCorrected - azi;
+            if (wasAziPointAdded)
+            {
+                wasAziPointAdded = false;
+                emit sendManualAziCorr(baseAzi);
+            }
             emit sendCorrectedAzi(aziCorrected);
-
         }
     }
 
@@ -167,7 +178,7 @@ void CorrectionTable::updateTableChart()
         ui->tableWidget->setItem(static_cast<int>(i), 3, itemAltCorr);
 
         /*Graph part*/
-        seriesAlt->append(altCorrVect.at(i).first, altCorrVect.at(i).second);
+        seriesAlt->append(altCorrVect.at(i).first, altCorrVect.at(i).second - altCorrVect.at(i).first);
 
     }
 
@@ -181,7 +192,7 @@ void CorrectionTable::updateTableChart()
         ui->tableWidget->setItem(static_cast<int>(i), 1, itemAziCorr);
 
         /*Graph part*/
-        seriesAzi->append(aziCorrVect.at(i).first, aziCorrVect.at(i).second);
+        seriesAzi->append(aziCorrVect.at(i).first, aziCorrVect.at(i).second - aziCorrVect.at(i).first);
 
     }
     QChart * chart = new QChart();

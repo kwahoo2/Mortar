@@ -82,8 +82,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(motordriver, SIGNAL(showManualAltCorr(double)), corrtable, SLOT(setCurrAltCorr(double)));
     connect(corrtable, SIGNAL(sendCorrectedAzi(double)), this, SLOT(setAzimuth(double)));
     connect(corrtable, SIGNAL(sendCorrectedAlt(double)), this, SLOT(setAltitude(double)));
-    connect(corrtable, SIGNAL(sendManualAltCorr(double)), motordriver, SLOT(setManualAltCorr(double)));
+
     connect(corrtable, SIGNAL(sendManualAziCorr(double)), motordriver, SLOT(setManualAziCorr(double)));
+    connect(corrtable, SIGNAL(sendManualAltCorr(double)), motordriver, SLOT(setManualAltCorr(double)));
+
 
     serialdriver->refreshPorts();
     prefsdialog->loadSettings();
