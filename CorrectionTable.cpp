@@ -234,3 +234,83 @@ void CorrectionTable::setPointsMinDist(double val)
 {
     pointsMinDist = val;
 }
+
+void CorrectionTable::on_saveTableButton_clicked()
+{
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("Save correction table"), "",
+        tr("CSV file (*.csv);;All files (*)"));
+    if (fileName.isEmpty())
+        return;
+    else
+    {
+        QFile file(fileName);
+        if (!file.open(QIODevice::WriteOnly))
+        {
+            QMessageBox::information(this, tr("Unable to open file"),
+                file.errorString());
+            return;
+        }
+        QTextStream out(&file);
+
+        for (ulong i = 0; i < altCorrVect.size(); ++i)
+        {
+            out << "Altitude " << QString::number(altCorrVect.at(i).first) << " " << QString::number(altCorrVect.at(i).second) << "\n";
+        }
+
+        for (ulong i = 0; i < aziCorrVect.size(); ++i)
+        {
+            out << "Azimuth " << QString::number(aziCorrVect.at(i).first) << " " << QString::number(aziCorrVect.at(i).second) << "\n";
+        }
+        file.close();
+    }
+}
+
+void CorrectionTable::on_loadTableButton_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Open correction table"), "",
+        tr("CSV file (*.csv);;All files (*)"));
+    if (fileName.isEmpty())
+        return;
+    else
+    {
+
+        QFile file(fileName);
+
+        if (!file.open(QIODevice::ReadOnly)) {
+            QMessageBox::information(this, tr("Unable to open file"),
+                file.errorString());
+            return;
+        }
+        QTextStream in(&file);
+        QString line;
+
+        altCorrVect.clear();
+        aziCorrVect.clear();
+        while (!in.atEnd())
+        {
+            line = in.readLine();
+            qDebug() << line;
+            QStringList fields;
+            fields = line.split(' ');
+            if (fields.length() == 3)
+            {
+                if (fields.at(0) == "Altitude")
+                {
+                    std::pair<double, double> altPair;
+                    altPair = std::make_pair (fields.at(1).toDouble(), fields.at(2).toDouble());
+                    altCorrVect.push_back(altPair);
+                }
+                if (fields.at(0) == "Azimuth")
+                {
+                    std::pair<double, double> aziPair;
+                    aziPair = std::make_pair (fields.at(1).toDouble(), fields.at(2).toDouble());
+                    aziCorrVect.push_back(aziPair);
+                }
+            }
+        }
+        updateTableChart();
+        file.close();
+    }
+}

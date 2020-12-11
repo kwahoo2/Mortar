@@ -29,6 +29,10 @@ private slots:
 
     void on_clearButton_clicked();
 
+    void on_saveTableButton_clicked();
+
+    void on_loadTableButton_clicked();
+
 private:
     Ui::CorrectionTable *ui;
 
