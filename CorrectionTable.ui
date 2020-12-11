@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>633</width>
-    <height>477</height>
+    <height>573</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -111,7 +111,14 @@
    <item row="8" column="0">
     <layout class="QGridLayout" name="gridLayout">
      <item row="5" column="0">
-      <widget class="QChartView" name="chartView"/>
+      <widget class="QChartView" name="chartViewAlt">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>200</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item row="4" column="0">
       <widget class="QTableWidget" name="tableWidget">
@@ -153,6 +160,16 @@
          <string>Corrected altitude</string>
         </property>
        </column>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QChartView" name="chartViewAzi">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>200</height>
+        </size>
+       </property>
       </widget>
      </item>
     </layout>

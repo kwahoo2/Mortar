@@ -20,6 +20,7 @@ public slots:
     void setCurrAzi (double val);
     void setCurrAltCorr (double val);
     void setCurrAziCorr (double val);
+    void setPointsMinDist(double val);
 
 private slots:
     void on_addCorrButton_clicked();

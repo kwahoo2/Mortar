@@ -165,8 +165,12 @@ void CorrectionTable::updateTableChart()
 
     QLineSeries * seriesAlt = new QLineSeries();
     QLineSeries * seriesAzi = new QLineSeries();
-    seriesAlt->setName("Altitude");
-    seriesAzi->setName("Azimuth");
+    QPen penAlt(Qt::red);
+    QPen penAzi(Qt::blue);
+    seriesAlt->setName("Altitude correction");
+    seriesAlt->setPen(penAlt);
+    seriesAzi->setName("Azimuth correction");
+    seriesAzi->setPen(penAzi);
 
     for (ulong i = 0; i < altCorrVect.size(); ++i)
     {
@@ -195,16 +199,25 @@ void CorrectionTable::updateTableChart()
         seriesAzi->append(aziCorrVect.at(i).first, aziCorrVect.at(i).second - aziCorrVect.at(i).first);
 
     }
-    QChart * chart = new QChart();
-    chart->addSeries(seriesAlt);
-    chart->addSeries(seriesAzi);
-    chart->createDefaultAxes();
+    QChart * chartAlt= new QChart();
+    chartAlt->addSeries(seriesAlt);
+    chartAlt->createDefaultAxes();
 
-    QChart * oldchart = ui->chartView->chart();
-    ui->chartView->setChart(chart);
+    QChart * oldchartAlt = ui->chartViewAlt->chart();
+    ui->chartViewAlt->setChart(chartAlt);
 
-    if (oldchart != nullptr)
-        delete oldchart; //To avoid memory leaks, the previous chart must be deleted.
+    if (oldchartAlt != nullptr)
+        delete oldchartAlt; //To avoid memory leaks, the previous chart must be deleted.
+
+    QChart * chartAzi= new QChart();
+    chartAzi->addSeries(seriesAzi);
+    chartAzi->createDefaultAxes();
+
+    QChart * oldchartAzi = ui->chartViewAzi->chart();
+    ui->chartViewAzi->setChart(chartAzi);
+
+    if (oldchartAzi != nullptr)
+        delete oldchartAzi;
 }
 
 void CorrectionTable::initVectorValues()
@@ -215,4 +228,9 @@ void CorrectionTable::initVectorValues()
     altCorrVect.push_back(std::make_pair(180.0, 180.0));
     aziCorrVect.push_back(std::make_pair(0.0, 0.0));
     aziCorrVect.push_back(std::make_pair(360.0, 360.0));
+}
+
+void CorrectionTable::setPointsMinDist(double val)
+{
+    pointsMinDist = val;
 }

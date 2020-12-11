@@ -132,6 +132,12 @@ void PrefsDialog::loadSettings()
         ui->hostLineEdit->setText(stellHost);
         emit changeStellHost(stellHost);
     }
+    if (settings.contains("Common/corrpointsmindist"))
+    {
+        double minDist = settings.value("Common/corrpointsmindist").toDouble();
+        ui->pointsDistSpinBox->setValue(minDist);
+        emit setPointsMinDist(minDist);
+    }
 }
 
 void PrefsDialog::loadPortSettings()
@@ -278,4 +284,10 @@ void PrefsDialog::on_dpadStepSpinBox_valueChanged(double arg1)
 {
     settings.setValue("Common/dpadstepsize", arg1);
     emit setDpadStepSize(arg1);
+}
+
+void PrefsDialog::on_pointsDistSpinBox_valueChanged(double arg1)
+{
+    settings.setValue("Common/corrpointsmindist", arg1);
+    emit setPointsMinDist(arg1);
 }
