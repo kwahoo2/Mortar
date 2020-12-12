@@ -88,6 +88,7 @@ private slots:
     void setDateEdit(QDate date);
     void setLocationEdit(QString location);
     void togglePosUpdate();
+    void setLocalizedName(const QString &name);
 
     void on_syncButton_toggled(bool checked);
     void on_pauseButton_toggled(bool checked);
@@ -101,5 +102,7 @@ private slots:
     void on_startStopIntervSlider_valueChanged(int value);
     void on_actionCorrection_values_triggered();
     void on_shutterModeButton_toggled(bool checked);
+    void on_virtTeleRadioButton_toggled(bool checked);
+    void on_selObjRadioButton_clicked(bool checked);
 };
 #endif // MAINWINDOW_H

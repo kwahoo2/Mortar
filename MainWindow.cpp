@@ -78,6 +78,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(motordriver, SIGNAL(showManualAltCorr(double)), this, SLOT(setManAltCorr(double)));
     connect(stelin, SIGNAL(sendAzimuthVal(double)), corrtable, SLOT(setCurrAzi(double)));
     connect(stelin, SIGNAL(sendAltitudeVal(double)), corrtable, SLOT(setCurrAlt(double)));
+    connect(stelin, SIGNAL(sendLocalizedName(const QString&)), this, SLOT(setLocalizedName(const QString&)));
+
     connect(motordriver, SIGNAL(showManualAziCorr(double)), corrtable, SLOT(setCurrAziCorr(double)));
     connect(motordriver, SIGNAL(showManualAltCorr(double)), corrtable, SLOT(setCurrAltCorr(double)));
     connect(corrtable, SIGNAL(sendCorrectedAzi(double)), this, SLOT(setAzimuth(double)));
@@ -243,6 +245,10 @@ void MainWindow::setLocationEdit(QString location)
     ui->locationEdit->setText(location);
 }
 
+void MainWindow::setLocalizedName(const QString &name)
+{
+    ui->trackedObjLabel->setText(name);
+}
 
 void MainWindow::on_syncGPSButton_clicked()
 {
@@ -327,5 +333,21 @@ void MainWindow::on_shutterModeButton_toggled(bool checked)
     {
         ui->shutterModeButton->setText("Enable shutter mode");
         motordriver->enableShutterMode(false);
+    }
+}
+
+void MainWindow::on_virtTeleRadioButton_toggled(bool checked)
+{
+    if (checked)
+    {
+        stelin->trackVirtualTelescope();
+    }
+}
+
+void MainWindow::on_selObjRadioButton_clicked(bool checked)
+{
+    if (checked)
+    {
+        stelin->trackSelectedObject();
     }
 }

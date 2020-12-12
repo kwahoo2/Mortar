@@ -34,16 +34,9 @@
 
 StellarInterface::StellarInterface(QObject *parent) : QObject(parent)
 {
-    altitudeStell = 0.0;
-    latitudeStell = 0.0;
-    longitudeStell = 0.0;
-    hours = 0;
-    mins = 0;
-    secs = 0.0;
+
     locationstr = "";
     date.setDate(2000, 1, 1);
-
-    syncWithGPS = false;
 
     timer = new QTimer;
     timer->setInterval(1000);
@@ -53,7 +46,7 @@ StellarInterface::StellarInterface(QObject *parent) : QObject(parent)
     telescopeName ="New Telescope 1";
 
     telescopeUrl.setUrl("http://" + stellHost + ":8090/api/objects/info?name=" + telescopeName + "&format=json");
-    qDebug() << "Stellarium telescope url:" << telescopeUrl;
+    qDebug() << "Stellarium tracked object url:" << telescopeUrl;
     connect(&networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(onResult(QNetworkReply*)));
     request.setUrl(telescopeUrl);
 
@@ -67,17 +60,31 @@ StellarInterface::StellarInterface(QObject *parent) : QObject(parent)
 void StellarInterface::changeTelescopeName(QString str)
 {
     telescopeName = str;
-    telescopeUrl.setUrl("http://" + stellHost + ":8090/api/objects/info?name=" + telescopeName + "&format=json");
-    request.setUrl(telescopeUrl); //FIXME
+    if (isVirtTelescTracked)
+    {
+        telescopeUrl.setUrl("http://" + stellHost + ":8090/api/objects/info?name=" + telescopeName + "&format=json");
+    }
+    else
+    {
+        telescopeUrl.setUrl("http://" + stellHost + ":8090/api/objects/info?format=json");
+    }
+    request.setUrl(telescopeUrl);
 
-    qDebug() << "Stellarium telescope url:" << telescopeUrl;
+    qDebug() << "Stellarium tracked object url:" << telescopeUrl;
 }
 void StellarInterface::changeStellHost(QString str)
 {
     stellHost = str;
-    telescopeUrl.setUrl("http://" + stellHost + ":8090/api/objects/info?name=" + telescopeName + "&format=json");
+    if (isVirtTelescTracked)
+    {
+        telescopeUrl.setUrl("http://" + stellHost + ":8090/api/objects/info?name=" + telescopeName + "&format=json");
+    }
+    else
+    {
+        telescopeUrl.setUrl("http://" + stellHost + ":8090/api/objects/info?format=json");
+    }
     request.setUrl(telescopeUrl);
-    qDebug() << "Stellarium telescope url:" << telescopeUrl;
+    qDebug() << "Stellarium tracked object url:" << telescopeUrl;
 }
 
 void StellarInterface::gotSerialString(QString gpsStr)
@@ -210,7 +217,6 @@ void StellarInterface::onResult(QNetworkReply* reply)
     if (reply->error() != QNetworkReply::NoError)
         return;
 
-    //QString data = static_cast<QString>(reply->readAll());
     QString data = QString::fromUtf8(reply->readAll());
 
     reply->deleteLater();
@@ -222,12 +228,13 @@ void StellarInterface::onResult(QNetworkReply* reply)
     QJsonObject json = doc.object();
 
     // Access properties
-    qDebug() << "Azimuth: " << json["azimuth"].toDouble();
+   /* qDebug() << "Azimuth: " << json["azimuth"].toDouble();
     qDebug() << "Altitude: " << json["altitude"].toDouble();
+    qDebug() << "Name: " << json["localized-name"].toString();*/
 
     emit(sendAzimuthVal(json["azimuth"].toDouble()));
     emit(sendAltitudeVal(json["altitude"].toDouble()));
-
+    emit(sendLocalizedName(json["localized-name"].toString()));
 
 }
 
@@ -235,6 +242,19 @@ void StellarInterface::enableGPSSync(bool val)
 {
     syncWithGPS = val;
     qDebug() << "Synced with GPS:" << val;
+}
+
+void StellarInterface::trackVirtualTelescope()
+{
+    isVirtTelescTracked = true;
+    telescopeUrl.setUrl("http://" + stellHost + ":8090/api/objects/info?name=" + telescopeName + "&format=json");
+    request.setUrl(telescopeUrl);
+}
+void StellarInterface::trackSelectedObject()
+{
+    isVirtTelescTracked = false;
+    telescopeUrl.setUrl("http://" + stellHost + ":8090/api/objects/info?format=json");
+    request.setUrl(telescopeUrl);
 }
 
 StellarInterface::~StellarInterface()

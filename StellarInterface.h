@@ -43,13 +43,16 @@ class StellarInterface : public QObject
 public:
     explicit StellarInterface(QObject *parent = nullptr);
     void enableGPSSync(bool val);
+    void trackVirtualTelescope();
+    void trackSelectedObject();
 
 private:
-    double altitudeStell, latitudeStell, longitudeStell;
-    bool syncWithGPS;
-    int hours, mins;
-    double secs;
-    QString locationstr;
+    double altitudeStell = 0.0, latitudeStell = 0.0, longitudeStell = 0.0;
+    bool syncWithGPS = false;
+    int hours = 0, mins = 0;
+    double secs = 0.0;
+    bool isVirtTelescTracked = true;
+    QString locationstr = "";
     QDate date;
     QNetworkAccessManager networkManager, postNetworkManager;
     QUrl telescopeUrl;
@@ -73,6 +76,8 @@ private slots:
 signals:
     void sendAzimuthVal(const double azimuth);
     void sendAltitudeVal(const double altitude);
+    void sendLocalizedName(const QString& name);
+
     void sendTime (const QTime time);
     void sendDate (const QDate date);
     void sendLocationstr(QString locationstr);

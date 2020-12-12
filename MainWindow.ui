@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>577</width>
-    <height>438</height>
+    <height>479</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,10 +36,10 @@
       <property name="sizeConstraint">
        <enum>QLayout::SetMinAndMaxSize</enum>
       </property>
-      <item row="9" column="2">
-       <widget class="QPushButton" name="syncGPSButton">
+      <item row="2" column="1">
+       <widget class="QLabel" name="label_6">
         <property name="text">
-         <string>Sync Stellarium with GPS</string>
+         <string>Manual azimuth correction</string>
         </property>
        </widget>
       </item>
@@ -50,50 +50,10 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="label_3">
+      <item row="6" column="3">
+       <widget class="QPushButton" name="shutterModeButton">
         <property name="text">
-         <string>Altitude</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="2">
-       <widget class="QLineEdit" name="locationEdit"/>
-      </item>
-      <item row="4" column="2">
-       <widget class="QPushButton" name="pauseButton">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Pause Movement</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="2">
-       <widget class="QTimeEdit" name="timeEdit">
-        <property name="displayFormat">
-         <string>HH:mm:ss</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QPushButton" name="powerDownButton">
-        <property name="text">
-         <string>Disable Steppers</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="3">
-       <widget class="QPushButton" name="resAltButton">
-        <property name="text">
-         <string>Reset Counter</string>
+         <string>Enable shutter mode</string>
         </property>
        </widget>
       </item>
@@ -104,15 +64,12 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="2">
-       <widget class="QPushButton" name="startStopButton">
-        <property name="text">
-         <string>Start Stop mode disabled</string>
+      <item row="6" column="2">
+       <widget class="QTimeEdit" name="timeEdit">
+        <property name="displayFormat">
+         <string>HH:mm:ss</string>
         </property>
        </widget>
-      </item>
-      <item row="7" column="2">
-       <widget class="QDateEdit" name="dateEdit"/>
       </item>
       <item row="6" column="1">
        <widget class="QLabel" name="label">
@@ -121,24 +78,41 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="3">
-       <widget class="QLabel" name="labelInterval">
+      <item row="5" column="2">
+       <widget class="QPushButton" name="startStopButton">
         <property name="text">
-         <string>Start Stop interval [s]: 10</string>
+         <string>Start Stop mode disabled</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="labelAzimuth">
+      <item row="8" column="1">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>GPS location</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLabel" name="labelManAlt">
         <property name="text">
          <string>0</string>
         </property>
        </widget>
+      </item>
+      <item row="7" column="2">
+       <widget class="QDateEdit" name="dateEdit"/>
       </item>
       <item row="1" column="2">
        <widget class="QLabel" name="labelAltitude">
         <property name="text">
          <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3">
+       <widget class="QLabel" name="labelInterval">
+        <property name="text">
+         <string>Start Stop interval [s]: 10</string>
         </property>
        </widget>
       </item>
@@ -164,10 +138,19 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="3">
-       <widget class="QPushButton" name="resAziButton">
+      <item row="4" column="2">
+       <widget class="QPushButton" name="pauseButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
-         <string>Reset Counter</string>
+         <string>Pause Movement</string>
         </property>
        </widget>
       </item>
@@ -184,17 +167,10 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="2">
-       <widget class="QLabel" name="labelManAlt">
+      <item row="5" column="1">
+       <widget class="QPushButton" name="powerDownButton">
         <property name="text">
-         <string>0</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>GPS location</string>
+         <string>Disable Steppers</string>
         </property>
        </widget>
       </item>
@@ -205,12 +181,36 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
-       <widget class="QLabel" name="label_6">
+      <item row="3" column="3">
+       <widget class="QPushButton" name="resAltButton">
         <property name="text">
-         <string>Manual azimuth correction</string>
+         <string>Reset Counter</string>
         </property>
        </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="labelAzimuth">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Altitude</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QPushButton" name="resAziButton">
+        <property name="text">
+         <string>Reset Counter</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="2">
+       <widget class="QLineEdit" name="locationEdit"/>
       </item>
       <item row="7" column="1">
        <widget class="QLabel" name="label_4">
@@ -219,25 +219,68 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="3">
-       <widget class="QPushButton" name="shutterModeButton">
+      <item row="9" column="1">
+       <widget class="QGroupBox" name="groupBox">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>80</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>Select tracked object</string>
+        </property>
+        <widget class="QRadioButton" name="virtTeleRadioButton">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>30</y>
+           <width>131</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Virtual telescope</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="selObjRadioButton">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>50</y>
+           <width>131</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Current object</string>
+         </property>
+        </widget>
+       </widget>
+      </item>
+      <item row="8" column="3">
+       <widget class="QPushButton" name="syncGPSButton">
         <property name="text">
-         <string>Enable shutter mode</string>
+         <string>Sync Stellarium with GPS</string>
         </property>
        </widget>
       </item>
-      <item row="9" column="1">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+      <item row="9" column="2">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>Tracked object name</string>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
+       </widget>
+      </item>
+      <item row="9" column="3">
+       <widget class="QLabel" name="trackedObjLabel">
+        <property name="text">
+         <string>...</string>
         </property>
-       </spacer>
+       </widget>
       </item>
      </layout>
     </item>
