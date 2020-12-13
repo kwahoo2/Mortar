@@ -108,18 +108,17 @@ void MotorWorker::run()
        // qDebug() << "MotorWorker Alt target pos: " << targetPosAlt << "act: " <<actPosAlt;
 
 #ifdef RASPBERRYPI
+        if (shutterModeEnabled && shutterPressAllowed) //shutterMode isderived from user's decision, shutterPressAlowed is derived from motors state
+        {
+            shutterPin.high();
+        }
+        else
+        {
+            shutterPin.low();
+        }
+
         if (!steppersDisabled)
         {
-
-            if (shutterModeEnabled && shutterPressAllowed) //shutterMode isderived from user's decision, shutterPressAlowed is derived from motors state
-            {
-                shutterPin.high();
-            }
-            else
-            {
-                shutterPin.low();
-            }
-
             aEnblPinPWMAlt.drive(static_cast<uint>(round(aPWMAlt * pwmRange)));
             bEnblPinPWMAlt.drive(static_cast<uint>(round(bPWMAlt * pwmRange)));
 
@@ -204,7 +203,7 @@ void MotorWorker::calcPinsValues(double targetPos, double &actPos,
     }
     else
     {
-       speed = absPosDiff * 0.8;
+       speed = absPosDiff * 0.95;
        limitPower = false;
     }
 

@@ -76,34 +76,39 @@ void MotorDriver::setTargetAzimuth (double val)
 void MotorDriver::updateAltitudeStepperTarget()
 {
     double currentStepTargetDiff = 0.0;
-    if ((targetAltitude + manualAltitudeCorrection) > currAltitude)
+    if (targetAltitude > oldTargetAltitude)
     {
-        currentStepTargetDiff = (targetAltitude + manualAltitudeCorrection + altHyster - currAltitude) / degPerStepAlt;
+        altHTmp = altHyster;
     }
-    else
+    else if (targetAltitude < oldTargetAltitude)
     {
-        currentStepTargetDiff = (targetAltitude + manualAltitudeCorrection - altHyster - currAltitude) / degPerStepAlt;
+        altHTmp = - altHyster;
     }
+
+    currentStepTargetDiff = (targetAltitude + manualAltitudeCorrection + altHTmp - currAltitude) / degPerStepAlt;
 
     emit setStepperAlt(currentStepTargetDiff);
     //qDebug() << "Altitude Target Step" << currentStepTargetDiff;
+    oldTargetAltitude = targetAltitude;
 }
 
 void MotorDriver::updateAzimuthStepperTarget()
 {
     double currentStepTargetDiff = 0.0;
+    if (targetAzimuth > oldTargetAzimuth)
+    {
+        aziHTmp = aziHyster;
+    }
+    else if (targetAzimuth < oldTargetAzimuth)
+    {
+        aziHTmp = - aziHyster;
+    }
 
-    if ((targetAzimuth + manualAzimuthCorrection) > currAzimuth)
-    {
-        currentStepTargetDiff = (targetAzimuth + manualAzimuthCorrection + aziHyster - currAzimuth) / degPerStepAzi;
-    }
-    else
-    {
-       currentStepTargetDiff = (targetAzimuth + manualAzimuthCorrection - aziHyster - currAzimuth) / degPerStepAzi;
-    }
+    currentStepTargetDiff = (targetAzimuth + manualAzimuthCorrection + aziHTmp - currAzimuth) / degPerStepAzi;
 
     emit setStepperAzi(currentStepTargetDiff);
     //qDebug() << "Azimuth Target Step" << currentStepTargetDiff;
+    oldTargetAzimuth = targetAzimuth;
 }
 void MotorDriver::setCurrAltitude (double val)
 {
