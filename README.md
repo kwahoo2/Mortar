@@ -105,7 +105,7 @@ You may use a gamepad to move your telescope. Analog stick works as coarse adjus
 
 4. Click "Sync with Stellarium". Both programs are synced now. Real telescope will follow the virtual one.
 
-5. While Mortar supports fine microstepping, constant movement may introduce vibrations. To prevent this a "Start Stop mode" is availabe. When enabled Mortat will move the telescope in predefined intervals.
+5. While Mortar supports fine microstepping, constant movement may introduce vibrations. To prevent this a "Start Stop mode" is available. When enabled Mortar will move the telescope in predefined intervals.
 
 ## Running Mortar with root privileges but without password
 
@@ -139,6 +139,23 @@ chmod +x Mortar.sh
 ```
 
 Now you can run Mortar by double clicking on the Mortar.sh script.
+
+
+## Disabling steppers at Pi startup
+Raspberry starts GPIO in unknown state, stepper motors may consume some energy, before Mortar is even started. To avoid this, you can set AENBL and BENBL pins to low at the RPi OS boot.
+
+Edit:
+
+    /boot/config.txt
+
+and add following lines:
+
+```
+gpio=4=op,dl
+gpio=18=op,dl
+gpio=20=op,dl
+gpio=21=op,dl
+```
 
 ### WiringPi legacy brach
 
