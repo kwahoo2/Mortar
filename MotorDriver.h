@@ -57,7 +57,7 @@ private:
     double manualAltitudeCorrection = 0.0;
     double manualAzimuthCorrection = 0.0;
     double degPerStepAzi = 360.0/(400.0*44.0);
-    double degPerStepAlt = 360.0/(400.0*22.0);
+    double degPerStepAlt = 360.0/(400.0*52.8);
     double aziHyster = 0.1 * degPerStepAzi; //some hysteresis factor to compensate gears clearance, elemnts flexibility, should be much smaller than single step size
     double altHyster = 0.1 * degPerStepAlt;
     double altHTmp = 0.0, aziHTmp = 0.0;

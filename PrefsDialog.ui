@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>452</width>
-    <height>414</height>
+    <height>452</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -81,7 +81,7 @@
         <number>100</number>
        </property>
        <property name="value">
-        <number>60</number>
+        <number>20</number>
        </property>
       </widget>
      </item>
@@ -94,7 +94,7 @@
         <number>100</number>
        </property>
        <property name="value">
-        <number>100</number>
+        <number>40</number>
        </property>
       </widget>
      </item>
@@ -233,7 +233,7 @@
         <double>99999.990000000005239</double>
        </property>
        <property name="value">
-        <double>22.000000000000000</double>
+        <double>52.799999999999997</double>
        </property>
       </widget>
      </item>
