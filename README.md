@@ -67,26 +67,17 @@ If you want use GPS, enable UART in the rpi-config utility.
 
 [uart]: https://raw.githubusercontent.com/kwahoo2/Mortar/master/.github/images/rpi-config.png "Raspberry UART setup" 
 
-Download and compile the [pigpio](http://abyz.me.uk/rpi/pigpio/index.html) library.
+Download, compile and run the software.
 
 ```
-git clone https://github.com/joan2937/pigpio.git
-cd pigpio
-make
-sudo make install
-```
-
-Download and compile and run the software.
-
-```
-sudo apt install qt5-default libqt5gamepad5-dev libqt5serialport5-dev libqt5-charts5-dev libxdo-dev
+sudo apt install qtbase5-dev libqt5gamepad5-dev libqt5serialport5-dev libqt5charts5-dev libxdo-dev pigpio
 git clone --recurse-submodules https://github.com/kwahoo2/Mortar 
 cd Mortar
 qmake -makefile -o Makefile Mortar.pro
 make
-./Mortar
+sudo ./Mortar
 ```
-Run Stellarium. Set remote access and configure telescope.
+Run Stellarium. Set remote access and configure the telescope.
 
 ![Remote access setup][stellar-remote]
 
@@ -116,6 +107,38 @@ You may use a gamepad to move your telescope. Analog stick works as coarse adjus
 
 5. While Mortar supports fine microstepping, constant movement may introduce vibrations. To prevent this a "Start Stop mode" is availabe. When enabled Mortat will move the telescope in predefined intervals.
 
+## Running Mortar with root privileges but without password
+
+If you see something like this in the console:
+
+```
+2022-12-21 20:00:32 gpioPWM: pigpio uninitialised, call gpioInitialise()
+2022-12-21 20:00:32 gpioPWM: pigpio uninitialised, call gpioInitialise()
+```
+
+that means you started Mortar as a normal user. pigpio requires root privileges for PWM. Writing password for sudo can be tedious, especially when there is no keyboard connected. There is a method that allows running sudo without password:
+
+Edit /etc/sudoers
+Add folwing line (replacing yourname and MortarLocation):
+
+```
+yourname ALL = NOPASSWD:/MortarLocation/Mortar
+```
+
+Create a script called eg Mortar.sh that containts (replace MortarLocation):
+
+```
+#!/bin/sh
+sudo /MortarLocation/Mortar
+```
+
+Make it executable:
+
+```
+chmod +x Mortar.sh
+```
+
+Now you can run Mortar by double clicking on the Mortar.sh script.
 
 ### WiringPi legacy brach
 
