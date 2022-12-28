@@ -158,7 +158,7 @@ gpio=21=op,dl
 ```
 
 ## Board testing, alternative usages
-There is a very basic Python script ([mortartest.py](https://github.com/kwahoo2/basic-test-py/mortartest.py)) that allows using the MortarShield as basic stepper driver. It can be used as an example for building other scripts too.
+There is a very basic Python script ([mortartest.py](https://github.com/kwahoo2/Mortar/blob/master/basic-test-py/mortartest.py)) that allows using the MortarShield as basic stepper driver. It can be used as an example for building other scripts too.
 
 Before running it you have to have the pigpio daemon running:
 
