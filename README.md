@@ -119,13 +119,13 @@ If you see something like this in the console:
 that means you started Mortar as a normal user. pigpio requires root privileges for PWM. Writing password for sudo can be tedious, especially when there is no keyboard connected. There is a method that allows running sudo without password:
 
 Edit /etc/sudoers
-Add folwing line (replacing yourname and MortarLocation):
+Add following line (replacing yourname and MortarLocation):
 
 ```
 yourname ALL = NOPASSWD:/MortarLocation/Mortar
 ```
 
-Create a script called eg Mortar.sh that containts (replace MortarLocation):
+Create a script called eg Mortar.sh that contains (replace MortarLocation):
 
 ```
 #!/bin/sh
@@ -141,8 +141,8 @@ chmod +x Mortar.sh
 Now you can run Mortar by double clicking on the Mortar.sh script.
 
 
-## Disabling steppers at Pi startup
-Raspberry starts GPIO in unknown state, stepper motors may consume some energy, before Mortar is even started. To avoid this, you can set AENBL and BENBL pins to low at the RPi OS boot.
+## Disabling steppers at Pi boot
+Raspberry starts GPIO in an unknown state, stepper motors may consume some energy, before Mortar is even started. To avoid this, you can set AENBL and BENBL pins to low at the RPi OS boot.
 
 Edit:
 
@@ -157,7 +157,27 @@ gpio=20=op,dl
 gpio=21=op,dl
 ```
 
-### WiringPi legacy brach
+## Board testing, alternative usages
+There is a very basic Python script ([mortartest.py](https://github.com/kwahoo2/basic-test-py/mortartest.py)) that allows using the MortarShield as basic stepper driver. It can be used as an example for building other scripts too.
+
+Before running it you have to have the pigpio daemon running:
+
+    sudo pigpiod
+
+For testing the board invoke the script:
+
+    python mortartest.py
+
+It will move both motors 50 steps forward and backward.
+
+To move by requester number of steps, import the script in the Python intepreter:
+
+```
+python
+import mortartest
+mortartest.move_stepper_to(50, 0) # move first (0) stepper 50 steps forward, ALT stepper is 0, AZI is 1
+```
+## WiringPi legacy brach
 
 wiringpi-legacy branch contains a deprecated implementation using WiringPi instead of pigpio. That brach supports full-step operation only. 
 
