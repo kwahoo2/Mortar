@@ -41,6 +41,9 @@ PrefsDialog::PrefsDialog(QWidget *parent) :
     gearRatioAlt = 22.0;
     stellHost = "localhost";
     telescopeName ="New Telescope 1";
+    ui->driverComboBox->addItem("DRV8814");
+    ui->driverComboBox->addItem("DRV8825");
+    loadDriverSettings();
 }
 
 void PrefsDialog::loadSettings()
@@ -144,12 +147,26 @@ void PrefsDialog::loadPortSettings()
 {
     if (settings.contains("Common/port"))
     {
-        storedport = settings.value("Common/port").toString();
-        int sel = ui->portsComboBox->findData(storedport, Qt::DisplayRole);
+        storedPort = settings.value("Common/port").toString();
+        int sel = ui->portsComboBox->findData(storedPort, Qt::DisplayRole);
         if (sel != -1)
         { // -1 for not found
            ui->portsComboBox->setCurrentIndex(sel);
-           emit givePortSelection(storedport);
+            emit givePortSelection(storedPort);
+        }
+    }
+}
+
+void PrefsDialog::loadDriverSettings()
+{
+    if (settings.contains("Common/driver"))
+    {
+        storedDriver = settings.value("Common/driver").toString();
+        int sel = ui->driverComboBox->findData(storedDriver, Qt::DisplayRole);
+        if (sel != -1)
+        { // -1 for not found
+           ui->driverComboBox->setCurrentIndex(sel);
+           emit giveDriverSelection(storedDriver);
         }
     }
 }
@@ -279,7 +296,6 @@ void PrefsDialog::on_decayCheckBox_toggled(bool checked)
 
 
 
-
 void PrefsDialog::on_dpadStepSpinBox_valueChanged(double arg1)
 {
     settings.setValue("Common/dpadstepsize", arg1);
@@ -291,3 +307,13 @@ void PrefsDialog::on_pointsDistSpinBox_valueChanged(double arg1)
     settings.setValue("Common/corrpointsmindist", arg1);
     emit setPointsMinDist(arg1);
 }
+
+
+
+
+void PrefsDialog::on_driverComboBox_activated(const QString &arg1)
+{
+    settings.setValue("Common/driver", arg1);
+    emit giveDriverSelection(arg1);
+}
+

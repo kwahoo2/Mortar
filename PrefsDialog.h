@@ -65,6 +65,7 @@ signals:
     void changeTelescopeName(QString str);
     void changeStellHost(QString str);
     void givePortSelection(QString portsel);
+    void giveDriverSelection(QString driversel);
     void setFastDecay(bool val);
     void setDpadStepSize(double val);
     void setPointsMinDist(double val);
@@ -87,15 +88,16 @@ private slots:
     void on_portsComboBox_activated(const QString &arg1);
     void on_decayCheckBox_toggled(bool checked);
     void on_dpadStepSpinBox_valueChanged(double arg1);
-
     void on_pointsDistSpinBox_valueChanged(double arg1);
+    void on_driverComboBox_activated(const QString &arg1);
 
 private:
     double stepsPerMotorRotatAzi, stepsPerMotorRotatAlt;
     double gearRatioAzi, gearRatioAlt;
     QString stellHost, telescopeName;
-    QString storedport;
+    QString storedPort, storedDriver;
     void loadPortSettings();
+    void loadDriverSettings();
 
     Ui::PrefsDialog *ui;
     QSettings settings;
