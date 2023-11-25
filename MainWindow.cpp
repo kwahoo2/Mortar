@@ -66,6 +66,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(prefsdialog, SIGNAL(setRunPWM(int)), motordriver, SLOT(setRunPWM(int)));
 
     connect(prefsdialog, SIGNAL(setFastDecay(bool)), motordriver, SLOT(setFastDecay(bool)));
+    connect(prefsdialog, SIGNAL(setDriver(int)), motordriver, SLOT(setDriver(int)));
     connect(serialdriver, SIGNAL(askForSerial()), this, SLOT(askForSerial()));
     connect(serialdriver, SIGNAL(listPorts(QList<QSerialPortInfo>)), prefsdialog, SLOT(addPortsNames(QList<QSerialPortInfo>)));
     connect(prefsdialog, SIGNAL(givePortSelection(QString)), serialdriver, SLOT(setPort(QString)));

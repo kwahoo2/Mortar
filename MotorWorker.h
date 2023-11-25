@@ -30,7 +30,7 @@
 #ifndef MOTORWORKER_H
 #define MOTORWORKER_H
 
-#ifdef __arm__
+#ifdef __ARM_ARCH
 #define RASPBERRYPI
 #endif
 
@@ -58,6 +58,7 @@ public:
     void setRunPWM(int val);
     void setFastDecay(bool val);
     void enableShutterMode(bool val);
+    void setDriver(int id);
 
 public slots:
     void setPositionAlt(double pos);
@@ -69,9 +70,21 @@ signals:
 private:
     void run() override;
     volatile bool worker_stopped = false;
-    void calcPinsValues(double targetPos, double &actPos,
+#ifdef RASPBERRYPI
+    void calcPinsValuesDRV8814(double targetPos, double &actPos,
                         double timeDeltaD, double maxSpeed,
                         bool &aPhase, bool &bPhase, double &aPWM, double &bPWM);
+    void driveDRV8814(pigpio_wcpp::DigitalOutput aPhPinAlt, pigpio_wcpp::DigitalOutput bPhPinAlt,
+                      pigpio_wcpp::DigitalOutput aPhPinAzi, pigpio_wcpp::DigitalOutput bPhPinAzi,
+                      pigpio_wcpp::PWM aEnblPinPWMAlt, pigpio_wcpp::PWM bEnblPinPWMAlt,
+                      pigpio_wcpp::PWM aEnblPinPWMAzi, pigpio_wcpp::PWM bEnblPinPWMAzi,
+                      pigpio_wcpp::DigitalOutput decPin, double timeDeltaD);
+    void driveDRV8825(pigpio_wcpp::DigitalOutput dirPinAlt, pigpio_wcpp::DigitalOutput stepPinAlt,
+                      pigpio_wcpp::DigitalOutput dirPinAzi, pigpio_wcpp::DigitalOutput stepPinAzi,
+                      pigpio_wcpp::PWM aEnblPinPWMAlt,
+                      pigpio_wcpp::PWM aEnblPinPWMAzi,
+                      pigpio_wcpp::DigitalOutput decPin);
+#endif
 
     double targetPosAlt = 0.0;
     double actPosAlt = 0.0;
@@ -90,7 +103,10 @@ private:
     qint64 lastTime;
     uint pwmRange = 1000;
     bool fastDecay = false;
-
+    int driverId = 0; // 0 = DRV8814, 1 = DRV8825
+    long int realUstep[2] = {0, 0}; // used for DRV8825 only
+    bool stepVal[2] = {0, 0};
+    bool dirVal[2]= {0, 0};
 };
 
 #endif // MOTORWORKER_H

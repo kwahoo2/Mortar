@@ -31,6 +31,8 @@
 #include <QDebug>
 #include <QElapsedTimer>
 #include <cmath>
+#include <iostream>
+#include <ostream>
 
 MotorWorker::MotorWorker(QObject *parent)
                         : QThread(parent)
@@ -85,11 +87,9 @@ void MotorWorker::run()
       1    0    38%
       0    1    71%
       0    0    100%*/
-
+#else
+    std::cout << "Pigpio drivers disabled! Are you running RaspberryPi?" << std::endl;
 #endif
-
-    bool aPhaseAlt, bPhaseAlt, aPhaseAzi, bPhaseAzi;
-    double aPWMAlt, bPWMAlt, aPWMAzi, bPWMAzi;
     QElapsedTimer elapsedTimer;
     elapsedTimer.start();
     lastTime = elapsedTimer.nsecsElapsed();
@@ -99,13 +99,9 @@ void MotorWorker::run()
         qint64 actTime = elapsedTimer.nsecsElapsed();
         double timeDeltaD = static_cast<double>(actTime - lastTime) / 1000000000;
         lastTime = actTime;
-        calcPinsValues(targetPosAlt, actPosAlt, timeDeltaD, maxSpeedAlt,
-                       aPhaseAlt, bPhaseAlt, aPWMAlt, bPWMAlt);
-        calcPinsValues(targetPosAzi, actPosAzi, timeDeltaD, maxSpeedAzi,
-                       aPhaseAzi, bPhaseAzi, aPWMAzi, bPWMAzi);
 
-       // qDebug() << "MotorWorker Azi target pos: " << targetPosAzi << "act: " <<actPosAzi;
-       // qDebug() << "MotorWorker Alt target pos: " << targetPosAlt << "act: " <<actPosAlt;
+       //qDebug() << "MotorWorker Azi target pos: " << targetPosAzi << "act: " <<actPosAzi;
+       //qDebug() << "MotorWorker Alt target pos: " << targetPosAlt << "act: " <<actPosAlt;
 
 #ifdef RASPBERRYPI
         if (shutterModeEnabled && shutterPressAllowed) //shutterMode isderived from user's decision, shutterPressAlowed is derived from motors state
@@ -116,79 +112,214 @@ void MotorWorker::run()
         {
             shutterPin.low();
         }
-
-        if (!steppersDisabled)
+        if (driverId == 0)
         {
-            aEnblPinPWMAlt.drive(static_cast<uint>(round(aPWMAlt * pwmRange)));
-            bEnblPinPWMAlt.drive(static_cast<uint>(round(bPWMAlt * pwmRange)));
-
-            if (aPhaseAlt)
-            {
-                aPhPinAlt.high();
-            }
-            else
-            {
-                aPhPinAlt.low();
-            }
-            if (bPhaseAlt)
-            {
-                bPhPinAlt.high();
-            }
-            else
-            {
-                bPhPinAlt.low();
-            }
-
-            aEnblPinPWMAzi.drive(static_cast<uint>(round(aPWMAzi * pwmRange)));
-            bEnblPinPWMAzi.drive(static_cast<uint>(round(bPWMAzi * pwmRange)));
-
-            if (aPhaseAzi)
-            {
-                aPhPinAzi.high();
-            }
-            else
-            {
-                aPhPinAzi.low();
-            }
-            if (bPhaseAzi)
-            {
-                bPhPinAzi.high();
-            }
-            else
-            {
-                bPhPinAzi.low();
-            }
+            driveDRV8814(aPhPinAlt, bPhPinAlt,
+                         aPhPinAzi, bPhPinAzi,
+                         aEnblPinPWMAlt, bEnblPinPWMAlt,
+                         aEnblPinPWMAzi, bEnblPinPWMAzi,
+                         decPin, timeDeltaD);
         }
-        else
+        if (driverId == 1)
         {
-            aEnblPinPWMAlt.drive(0);
-            bEnblPinPWMAlt.drive(0);
-            aEnblPinPWMAzi.drive(0);
-            bEnblPinPWMAzi.drive(0);
-
+            driveDRV8825(aPhPinAlt, bPhPinAlt,
+                         aPhPinAzi, bPhPinAzi,
+                         aEnblPinPWMAlt,
+                         aEnblPinPWMAzi,
+                         decPin);
         }
-        if (fastDecay)
-        {
-            decPin.high();
-        }
-        else
-        {
-            decPin.low();
-        }
-    #endif
-        usleep(200);
-
+#endif
     }
-    #ifdef RASPBERRYPI
+#ifdef RASPBERRYPI
     aEnblPinPWMAlt.off();
     bEnblPinPWMAlt.off();
     aEnblPinPWMAzi.off();
     bEnblPinPWMAzi.off();
     board.kill();
-    #endif
+#endif
 }
 
-void MotorWorker::calcPinsValues(double targetPos, double &actPos,
+#ifdef RASPBERRYPI
+void MotorWorker::driveDRV8814(pigpio_wcpp::DigitalOutput aPhPinAlt, pigpio_wcpp::DigitalOutput bPhPinAlt,
+                               pigpio_wcpp::DigitalOutput aPhPinAzi, pigpio_wcpp::DigitalOutput bPhPinAzi,
+                               pigpio_wcpp::PWM aEnblPinPWMAlt, pigpio_wcpp::PWM bEnblPinPWMAlt,
+                               pigpio_wcpp::PWM aEnblPinPWMAzi, pigpio_wcpp::PWM bEnblPinPWMAzi,
+                               pigpio_wcpp::DigitalOutput decPin, double timeDeltaD)
+    {
+    bool aPhaseAlt = 0, bPhaseAlt = 0, aPhaseAzi = 0, bPhaseAzi = 0;
+    double aPWMAlt, bPWMAlt, aPWMAzi, bPWMAzi;
+    if (!steppersDisabled)
+    {
+        calcPinsValuesDRV8814(targetPosAlt, actPosAlt, timeDeltaD, maxSpeedAlt,
+                       aPhaseAlt, bPhaseAlt, aPWMAlt, bPWMAlt);
+        calcPinsValuesDRV8814(targetPosAzi, actPosAzi, timeDeltaD, maxSpeedAzi,
+                       aPhaseAzi, bPhaseAzi, aPWMAzi, bPWMAzi);
+        aEnblPinPWMAlt.drive(static_cast<uint>(round(aPWMAlt * pwmRange)));
+        bEnblPinPWMAlt.drive(static_cast<uint>(round(bPWMAlt * pwmRange)));
+
+        if (aPhaseAlt)
+        {
+            aPhPinAlt.high();
+        }
+        else
+        {
+            aPhPinAlt.low();
+        }
+        if (bPhaseAlt)
+        {
+            bPhPinAlt.high();
+        }
+        else
+        {
+            bPhPinAlt.low();
+        }
+
+        aEnblPinPWMAzi.drive(static_cast<uint>(round(aPWMAzi * pwmRange)));
+        bEnblPinPWMAzi.drive(static_cast<uint>(round(bPWMAzi * pwmRange)));
+
+        if (aPhaseAzi)
+        {
+            aPhPinAzi.high();
+        }
+        else
+        {
+            aPhPinAzi.low();
+        }
+        if (bPhaseAzi)
+        {
+            bPhPinAzi.high();
+        }
+        else
+        {
+            bPhPinAzi.low();
+        }
+    }
+    else
+    {
+        aEnblPinPWMAlt.drive(0);
+        bEnblPinPWMAlt.drive(0);
+        aEnblPinPWMAzi.drive(0);
+        bEnblPinPWMAzi.drive(0);
+
+    }
+    if (fastDecay)
+    {
+        decPin.high();
+    }
+    else
+    {
+        decPin.low();
+    }
+    usleep(200);
+}
+
+/* Pin names match DRV8814 nomenclature. When DRV8825 is used instead:
+* decPin is reused
+* xI0Pin and XI1Pin are not used
+* aEnblPinPWMAlt and aEnblPinPWMAzi are reused as nENBL DRV8825 input Note: setting LOW enables indexer logic and H-bridges,
+* since it affects indexer logic it PWM cannot be used to limit power during rotation (but should be possible in stopped state)
+* for completely enabling or disabling steppers
+* bEnblPinPWMAlt and bEnblPinPWMAzi are not used
+* aPhPinAlt and aPhPinAzi are reused as DIR DRV8825 input
+* bPhPinAlt and bPhPinAzi are reused as STEP DRV8825 input
+*/
+
+void MotorWorker::driveDRV8825(pigpio_wcpp::DigitalOutput dirPinAlt, pigpio_wcpp::DigitalOutput stepPinAlt,
+                               pigpio_wcpp::DigitalOutput dirPinAzi, pigpio_wcpp::DigitalOutput stepPinAzi,
+                               pigpio_wcpp::PWM aEnblPinPWMAlt,
+                               pigpio_wcpp::PWM aEnblPinPWMAzi,
+                               pigpio_wcpp::DigitalOutput decPin)
+{
+    double enblPWM;
+    if (!steppersDisabled)
+    {
+        for (int motorId = 0; motorId < 2; motorId++)
+        {
+            int targetUStep = 0;
+            long int rUStep = realUstep[motorId];
+            if (motorId == 0)
+            {
+                /*DRV8825 can divide in 32 mcrosteps, but indexes on rising edge only, so pin state has to be changed  2 * 32 times*/
+                targetUStep = rint(targetPosAlt * 64.0);
+                //qDebug() << "MotorWorker targetUstep " << targetUStep << "rUstep " <<rUStep;
+            }
+            if (motorId == 1)
+            {
+                targetUStep = rint(targetPosAzi * 64.0);
+            }
+
+            if (targetUStep > rUStep)
+            {
+                enblPWM = 0.0; //nENBL, LOW state active
+                shutterPressAllowed = false;
+                rUStep++;
+                dirVal[motorId] = 1; // DIR
+                if (rUStep % 2)
+                    stepVal[motorId] = 1; // STEP rising edge
+                else
+                    stepVal[motorId] = 0; // STEP falling edge
+            }
+            else if (targetUStep < rUStep)
+            {
+                enblPWM = 0.0;
+                shutterPressAllowed = false;
+                rUStep--;
+                dirVal[motorId] = 0;
+                if (rUStep % 2)
+                    stepVal[motorId] = 1;
+                else
+                    stepVal[motorId] = 0;
+            }
+            else
+            {
+                enblPWM = 0.0;
+                //enblPWM = 1.0 - holdPower; // shutting down H-bridges with PWM
+                shutterPressAllowed = true;
+            }
+            realUstep[motorId] = rUStep;
+            /*driving pins happens here*/
+            if (motorId == 0)
+            {
+                if (dirVal[motorId] == 1)
+                    {dirPinAlt.high();}
+                else
+                    {dirPinAlt.low();}
+                if (stepVal[motorId] == 1)
+                    {stepPinAlt.high();}
+                else
+                    {stepPinAlt.low();}
+                aEnblPinPWMAlt.drive(static_cast<uint>(round(enblPWM * pwmRange)));
+            }
+            if (motorId == 1)
+            {
+                if (dirVal[motorId] == 1)
+                    {dirPinAzi.high();}
+                else
+                    {dirPinAzi.low();}
+                if (stepVal[motorId] == 1)
+                    {stepPinAzi.high();}
+                else
+                    {stepPinAzi.low();}
+                aEnblPinPWMAzi.drive(static_cast<uint>(round(enblPWM * pwmRange)));
+            }
+            if (fastDecay)
+            {decPin.high();}
+            else
+            {decPin.low();}
+        }
+        double maxSpd = std::min(maxSpeedAlt, maxSpeedAzi); //TODO make Azi and Alt speed decoupled
+        int uStepInterval = rint(1e6 / (64 * maxSpd));
+        usleep (uStepInterval);
+    }
+    else
+    {
+        aEnblPinPWMAlt.drive(1 * pwmRange);
+        aEnblPinPWMAzi.drive(1 * pwmRange); //DRV8825 nENBL logic is reversed
+        //disable steppers
+    }
+}
+
+void MotorWorker::calcPinsValuesDRV8814(double targetPos, double &actPos,
                                  double timeDelta, double maxSpeed,
                                  bool &aPhase, bool &bPhase, double &aPWM, double &bPWM)
 {
@@ -278,6 +409,7 @@ void MotorWorker::calcPinsValues(double targetPos, double &actPos,
     aPWM = abs(sin((M_PI * step) / 2)) * powerLimit;
     bPWM = abs(cos((M_PI * step) / 2)) * powerLimit;
 }
+#endif
 
 void MotorWorker::setPositionAlt(double pos)
 {
@@ -329,6 +461,12 @@ void MotorWorker::setFastDecay(bool val)
 void MotorWorker::enableShutterMode(bool val)
 {
     shutterModeEnabled = val;
+}
+
+void MotorWorker::setDriver(int id)
+{
+    driverId = id;
+    qDebug() << "Driver id:" << id;
 }
 
 

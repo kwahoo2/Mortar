@@ -44,7 +44,7 @@ FORMS += \
 LIBS += -lxdo
 
 linux {
-    contains(QMAKE_HOST.arch, arm.*):{
+    contains(QMAKE_HOST.arch, aarch.*):{
         LIBS += -lpigpio -lrt
         HEADERS += \
             CBoard.h \

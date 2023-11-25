@@ -65,12 +65,10 @@ signals:
     void changeTelescopeName(QString str);
     void changeStellHost(QString str);
     void givePortSelection(QString portsel);
-    void giveDriverSelection(QString driversel);
+    void setDriver(int id);
     void setFastDecay(bool val);
     void setDpadStepSize(double val);
     void setPointsMinDist(double val);
-
-
 
 private slots:
     void on_aziStepsSpinBox_valueChanged(double arg1);

@@ -207,6 +207,10 @@ void MotorDriver::enableShutterMode(bool val)
     mWorker->enableShutterMode(val);
 }
 
+void MotorDriver::setDriver(int id)
+{
+    mWorker->setDriver(id);
+}
 
 MotorDriver::~MotorDriver()
 {

@@ -43,7 +43,6 @@ PrefsDialog::PrefsDialog(QWidget *parent) :
     telescopeName ="New Telescope 1";
     ui->driverComboBox->addItem("DRV8814");
     ui->driverComboBox->addItem("DRV8825");
-    loadDriverSettings();
 }
 
 void PrefsDialog::loadSettings()
@@ -141,6 +140,7 @@ void PrefsDialog::loadSettings()
         ui->pointsDistSpinBox->setValue(minDist);
         emit setPointsMinDist(minDist);
     }
+    loadDriverSettings();
 }
 
 void PrefsDialog::loadPortSettings()
@@ -166,7 +166,7 @@ void PrefsDialog::loadDriverSettings()
         if (sel != -1)
         { // -1 for not found
            ui->driverComboBox->setCurrentIndex(sel);
-           emit giveDriverSelection(storedDriver);
+           emit setDriver(sel);
         }
     }
 }
@@ -294,8 +294,6 @@ void PrefsDialog::on_decayCheckBox_toggled(bool checked)
     emit setFastDecay(checked);
 }
 
-
-
 void PrefsDialog::on_dpadStepSpinBox_valueChanged(double arg1)
 {
     settings.setValue("Common/dpadstepsize", arg1);
@@ -308,12 +306,10 @@ void PrefsDialog::on_pointsDistSpinBox_valueChanged(double arg1)
     emit setPointsMinDist(arg1);
 }
 
-
-
-
 void PrefsDialog::on_driverComboBox_activated(const QString &arg1)
 {
     settings.setValue("Common/driver", arg1);
-    emit giveDriverSelection(arg1);
+    int id = ui->driverComboBox->currentIndex();
+    emit setDriver(id);
 }
 

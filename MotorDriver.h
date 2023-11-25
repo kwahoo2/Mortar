@@ -100,6 +100,8 @@ public slots:
     void setHoldPWM(int val);
     void setRunPWM(int val);
 
+    void setDriver(int id);
+
 signals:
     void setStepperAlt(double step);
     void setStepperAzi(double step);
