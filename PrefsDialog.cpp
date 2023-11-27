@@ -34,6 +34,7 @@ PrefsDialog::PrefsDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::PrefsDialog)
 {
+    connect(this, SIGNAL(setDriver(int)), this, SLOT(setActiveBoxes(int)));
     ui->setupUi(this);
     stepsPerMotorRotatAzi = 400.0;
     stepsPerMotorRotatAlt = 400.0;
@@ -311,5 +312,24 @@ void PrefsDialog::on_driverComboBox_activated(const QString &arg1)
     settings.setValue("Common/driver", arg1);
     int id = ui->driverComboBox->currentIndex();
     emit setDriver(id);
+}
+
+void PrefsDialog::setActiveBoxes(int driverid)
+{
+    switch (driverid)
+    {
+    case 0:
+        ui->altSpeedSpinBox->setEnabled(true);
+        ui->holdPWMSpinBox->setEnabled(true);
+        ui->runPWMSpinBox->setEnabled(true);
+        break;
+    case 1:
+        ui->altSpeedSpinBox->setEnabled(false);
+        ui->holdPWMSpinBox->setEnabled(false);
+        ui->runPWMSpinBox->setEnabled(false);
+        break;
+    default:
+        break;
+    }
 }
 

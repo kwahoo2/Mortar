@@ -88,6 +88,7 @@ private slots:
     void on_dpadStepSpinBox_valueChanged(double arg1);
     void on_pointsDistSpinBox_valueChanged(double arg1);
     void on_driverComboBox_activated(const QString &arg1);
+    void setActiveBoxes(int driverid);
 
 private:
     double stepsPerMotorRotatAzi, stepsPerMotorRotatAlt;

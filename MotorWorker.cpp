@@ -307,7 +307,7 @@ void MotorWorker::driveDRV8825(pigpio_wcpp::DigitalOutput dirPinAlt, pigpio_wcpp
             else
             {decPin.low();}
         }
-        double maxSpd = std::min(maxSpeedAlt, maxSpeedAzi); //TODO make Azi and Alt speed decoupled
+        double maxSpd = maxSpeedAzi; //Azimuth speed is used for both axes
         int uStepInterval = rint(1e6 / (64 * maxSpd));
         usleep (uStepInterval);
     }
