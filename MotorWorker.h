@@ -47,6 +47,7 @@ class MotorWorker : public QThread
     Q_OBJECT
 public:
     explicit MotorWorker(QObject *parent = nullptr);
+    ~MotorWorker();
 
 public:
     void stop() {worker_stopped = true;}
@@ -71,19 +72,20 @@ private:
     void run() override;
     volatile bool worker_stopped = false;
 #ifdef RASPBERRYPI
+    pigpio_wcpp::Board board;
     void calcPinsValuesDRV8814(double targetPos, double &actPos,
                         double timeDeltaD, double maxSpeed,
                         bool &aPhase, bool &bPhase, double &aPWM, double &bPWM);
-    void driveDRV8814(pigpio_wcpp::DigitalOutput aPhPinAlt, pigpio_wcpp::DigitalOutput bPhPinAlt,
-                      pigpio_wcpp::DigitalOutput aPhPinAzi, pigpio_wcpp::DigitalOutput bPhPinAzi,
-                      pigpio_wcpp::PWM aEnblPinPWMAlt, pigpio_wcpp::PWM bEnblPinPWMAlt,
-                      pigpio_wcpp::PWM aEnblPinPWMAzi, pigpio_wcpp::PWM bEnblPinPWMAzi,
-                      pigpio_wcpp::DigitalOutput decPin, double timeDeltaD);
-    void driveDRV8825(pigpio_wcpp::DigitalOutput dirPinAlt, pigpio_wcpp::DigitalOutput stepPinAlt,
-                      pigpio_wcpp::DigitalOutput dirPinAzi, pigpio_wcpp::DigitalOutput stepPinAzi,
-                      pigpio_wcpp::PWM aEnblPinPWMAlt,
-                      pigpio_wcpp::PWM aEnblPinPWMAzi,
-                      pigpio_wcpp::DigitalOutput decPin);
+    void driveDRV8814(std::unique_ptr<pigpio_wcpp::DigitalOutput> &aPhPinAlt, std::unique_ptr<pigpio_wcpp::DigitalOutput> &bPhPinAlt,
+                      std::unique_ptr<pigpio_wcpp::DigitalOutput> &aPhPinAzi, std::unique_ptr<pigpio_wcpp::DigitalOutput> &bPhPinAzi,
+                      std::unique_ptr<pigpio_wcpp::PWM> &aEnblPinPWMAlt, std::unique_ptr<pigpio_wcpp::PWM> &bEnblPinPWMAlt,
+                      std::unique_ptr<pigpio_wcpp::PWM> &aEnblPinPWMAzi, std::unique_ptr<pigpio_wcpp::PWM> &bEnblPinPWMAzi,
+                      std::unique_ptr<pigpio_wcpp::DigitalOutput> &decPin, double timeDeltaD);
+    void driveDRV8825(std::unique_ptr<pigpio_wcpp::DigitalOutput> &dirPinAlt, std::unique_ptr<pigpio_wcpp::DigitalOutput> &stepPinAlt,
+                      std::unique_ptr<pigpio_wcpp::DigitalOutput> &dirPinAzi, std::unique_ptr<pigpio_wcpp::DigitalOutput> &stepPinAzi,
+                      std::unique_ptr<pigpio_wcpp::DigitalOutput> &disablPinAlt,
+                      std::unique_ptr<pigpio_wcpp::DigitalOutput> &disablPinAzi,
+                      std::unique_ptr<pigpio_wcpp::DigitalOutput> &decPin);
 #endif
 
     double targetPosAlt = 0.0;

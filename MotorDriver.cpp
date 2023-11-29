@@ -35,7 +35,6 @@ MotorDriver::MotorDriver(QObject *parent) : QObject(parent)
 
 
     mWorker = new MotorWorker(this);
-    mWorker->start();
 
     qDebug() << "degPerStepAzi" << degPerStepAzi;
     qDebug() << "degPerStepAlt" << degPerStepAlt;
@@ -43,6 +42,22 @@ MotorDriver::MotorDriver(QObject *parent) : QObject(parent)
     connect(this, SIGNAL(setStepperAlt(double)), mWorker, SLOT(setPositionAlt(double)));
     connect(this, SIGNAL(setStepperAzi(double)), mWorker, SLOT(setPositionAzi(double)));
 
+}
+
+void MotorDriver::setDriver(int driverId)
+{
+    /*this method starts or restarts driver's thread after setting the driver's identifier
+    *should be used after user changes the driver in preferences*/
+    if (mWorker->isRunning())
+    {
+        mWorker->stop();
+    }
+    while (mWorker->isRunning())
+    {
+
+    }
+    mWorker->setDriver(driverId);
+    mWorker->start();
 }
 
 void MotorDriver::startDriver()
@@ -205,11 +220,6 @@ void MotorDriver::setRunPWM(int val)
 void MotorDriver::enableShutterMode(bool val)
 {
     mWorker->enableShutterMode(val);
-}
-
-void MotorDriver::setDriver(int id)
-{
-    mWorker->setDriver(id);
 }
 
 MotorDriver::~MotorDriver()

@@ -33,60 +33,94 @@
 #include <cmath>
 #include <iostream>
 #include <ostream>
+#include <memory>
 
 MotorWorker::MotorWorker(QObject *parent)
                         : QThread(parent)
 {
-
+#ifdef RASPBERRYPI
+    board = pigpio_wcpp::Board();
+    board.initialise();
+    qDebug() << "Board version: " << board.version();
+#endif
 }
 
 void MotorWorker::run()
 {
+    worker_stopped = false;
+    std::cout <<"Using driver id: " << driverId << std::endl;
 #ifdef RASPBERRYPI
-    pigpio_wcpp::Board board = pigpio_wcpp::Board();
-    board.initialise();
-    qDebug() << "Board version: " << board.version();
 
-    pigpio_wcpp::DigitalOutput decPin = pigpio_wcpp::DigitalOutput(22);  //GPIO 22, physical pin 15
-    pigpio_wcpp::DigitalOutput xI0Pin = pigpio_wcpp::DigitalOutput(17); //GPIO17, physical pin 11, current regulation
-    pigpio_wcpp::DigitalOutput xI1Pin = pigpio_wcpp::DigitalOutput(27); //GPIO27, physical pin 13
+    std::unique_ptr<pigpio_wcpp::DigitalOutput> shutterPin, decPin, xI0Pin, xI1Pin, aPhPinAlt, bPhPinAlt, aPhPinAzi, bPhPinAzi;
+    std::unique_ptr<pigpio_wcpp::DigitalOutput> disablPinAlt, dirPinAlt, stepPinAlt, disablPinAzi, dirPinAzi, stepPinAzi;
+    std::unique_ptr<pigpio_wcpp::PWM> aEnblPinPWMAlt, bEnblPinPWMAlt, aEnblPinPWMAzi, bEnblPinPWMAzi;
 
-    pigpio_wcpp::PWM aEnblPinPWMAlt = pigpio_wcpp::PWM(4); //GPIO 4, physical pin 7
-    pigpio_wcpp::DigitalOutput aPhPinAlt = pigpio_wcpp::DigitalOutput(5);  //GPIO 5, physical pin 29
-    pigpio_wcpp::PWM bEnblPinPWMAlt = pigpio_wcpp::PWM(18); //GPIO 18, physical pin 12
-    pigpio_wcpp::DigitalOutput bPhPinAlt = pigpio_wcpp::DigitalOutput(6);  //GPIO 6, physical pin 31
 
-    pigpio_wcpp::PWM aEnblPinPWMAzi = pigpio_wcpp::PWM(20); //GPIO 20, physical pin 38
-    pigpio_wcpp::DigitalOutput aPhPinAzi = pigpio_wcpp::DigitalOutput(12);  //GPIO 12, physical pin 32
-    pigpio_wcpp::PWM bEnblPinPWMAzi = pigpio_wcpp::PWM(21); //GPIO 21, physical pin 21
-    pigpio_wcpp::DigitalOutput bPhPinAzi = pigpio_wcpp::DigitalOutput(26);  //GPIO 26, physical pin 37
+    if (driverId == 0)
+    {
+        decPin = std::make_unique<pigpio_wcpp::DigitalOutput>(22);  //GPIO 22, physical pin 15
+        xI0Pin = std::make_unique<pigpio_wcpp::DigitalOutput>(17); //GPIO17, physical pin 11, current regulation
+        xI1Pin = std::make_unique<pigpio_wcpp::DigitalOutput>(27); //GPIO27, physical pin 13
 
-    pigpio_wcpp::DigitalOutput shutterPin = pigpio_wcpp::DigitalOutput(25);  //GPIO 25, physical pin 22
+        aEnblPinPWMAlt = std::make_unique<pigpio_wcpp::PWM>(4); //GPIO 4, physical pin 7
+        aPhPinAlt = std::make_unique<pigpio_wcpp::DigitalOutput>(5);  //GPIO 5, physical pin 29
+        bEnblPinPWMAlt = std::make_unique<pigpio_wcpp::PWM>(18); //GPIO 18, physical pin 12
+        bPhPinAlt = std::make_unique<pigpio_wcpp::DigitalOutput>(6);  //GPIO 6, physical pin 31
 
-    xI0Pin.low();
-    xI1Pin.low();
-    decPin.low();
-    aPhPinAlt.low();
-    bPhPinAlt.low();
-    aPhPinAzi.low();
-    bPhPinAzi.low();
-    shutterPin.low();
+        aEnblPinPWMAzi = std::make_unique<pigpio_wcpp::PWM>(20); //GPIO 20, physical pin 38
+        aPhPinAzi = std::make_unique<pigpio_wcpp::DigitalOutput>(12);  //GPIO 12, physical pin 32
+        bEnblPinPWMAzi = std::make_unique<pigpio_wcpp::PWM>(21); //GPIO 21, physical pin 21
+        bPhPinAzi = std::make_unique<pigpio_wcpp::DigitalOutput>(26);  //GPIO 26, physical pin 37
 
-    aEnblPinPWMAlt.setFrequency(40000);
-    aEnblPinPWMAlt.setRange(pigpio_wcpp::PWMRange(pwmRange));
-    bEnblPinPWMAlt.setFrequency(40000);
-    bEnblPinPWMAlt.setRange(pigpio_wcpp::PWMRange(pwmRange));
+        shutterPin = std::make_unique<pigpio_wcpp::DigitalOutput>(25);  //GPIO 25, physical pin 22
 
-    aEnblPinPWMAzi.setFrequency(40000);
-    aEnblPinPWMAzi.setRange(pigpio_wcpp::PWMRange(pwmRange));
-    bEnblPinPWMAzi.setFrequency(40000);
-    bEnblPinPWMAzi.setRange(pigpio_wcpp::PWMRange(pwmRange));
+        xI0Pin->low();
+        xI1Pin->low();
+        decPin->low();
+        aPhPinAlt->low();
+        bPhPinAlt->low();
+        aPhPinAzi->low();
+        bPhPinAzi->low();
+        shutterPin->low();
 
-    /*xI1 xI0 Current
-      1    1    0%
-      1    0    38%
-      0    1    71%
-      0    0    100%*/
+        aEnblPinPWMAlt->setFrequency(40000);
+        aEnblPinPWMAlt->setRange(pigpio_wcpp::PWMRange(pwmRange));
+        bEnblPinPWMAlt->setFrequency(40000);
+        bEnblPinPWMAlt->setRange(pigpio_wcpp::PWMRange(pwmRange));
+
+        aEnblPinPWMAzi->setFrequency(40000);
+        aEnblPinPWMAzi->setRange(pigpio_wcpp::PWMRange(pwmRange));
+        bEnblPinPWMAzi->setFrequency(40000);
+        bEnblPinPWMAzi->setRange(pigpio_wcpp::PWMRange(pwmRange));
+
+        /*xI1 xI0 Current
+          1    1    0%
+          1    0    38%
+          0    1    71%
+          0    0    100%*/
+    }
+    if (driverId == 1)
+    {
+        decPin = std::make_unique<pigpio_wcpp::DigitalOutput>(22);  //GPIO 22, physical pin 15
+
+        disablPinAlt = std::make_unique<pigpio_wcpp::DigitalOutput>(4); //GPIO 4, physical pin 7
+        dirPinAlt = std::make_unique<pigpio_wcpp::DigitalOutput>(5);  //GPIO 5, physical pin 29
+        stepPinAlt = std::make_unique<pigpio_wcpp::DigitalOutput>(6);  //GPIO 6, physical pin 31
+
+        disablPinAzi = std::make_unique<pigpio_wcpp::DigitalOutput>(20); //GPIO 20, physical pin 38
+        dirPinAzi = std::make_unique<pigpio_wcpp::DigitalOutput>(12);  //GPIO 12, physical pin 32
+        stepPinAzi = std::make_unique<pigpio_wcpp::DigitalOutput>(26);  //GPIO 26, physical pin 37
+
+        decPin->low();
+        disablPinAlt->high(); //DRV8825 is enabled when low state on nENBL pin
+        dirPinAlt->low();
+        stepPinAlt->low();
+
+        disablPinAzi->high();
+        dirPinAzi->low();
+        stepPinAzi->low();
+    }
+
 #else
     std::cout << "Pigpio drivers disabled! Are you running RaspberryPi?" << std::endl;
 #endif
@@ -106,12 +140,15 @@ void MotorWorker::run()
 #ifdef RASPBERRYPI
         if (shutterModeEnabled && shutterPressAllowed) //shutterMode isderived from user's decision, shutterPressAlowed is derived from motors state
         {
-            shutterPin.high();
+            if (shutterPin) // check if not nullptr, otherwise will segfault
+            {shutterPin->high();}
         }
         else
         {
-            shutterPin.low();
+            if (shutterPin)
+            {shutterPin->low();}
         }
+
         if (driverId == 0)
         {
             driveDRV8814(aPhPinAlt, bPhPinAlt,
@@ -122,29 +159,39 @@ void MotorWorker::run()
         }
         if (driverId == 1)
         {
-            driveDRV8825(aPhPinAlt, bPhPinAlt,
-                         aPhPinAzi, bPhPinAzi,
-                         aEnblPinPWMAlt,
-                         aEnblPinPWMAzi,
+            driveDRV8825(dirPinAlt, stepPinAlt,
+                         dirPinAzi, stepPinAzi,
+                         disablPinAlt,
+                         disablPinAzi,
                          decPin);
         }
 #endif
     }
 #ifdef RASPBERRYPI
-    aEnblPinPWMAlt.off();
-    bEnblPinPWMAlt.off();
-    aEnblPinPWMAzi.off();
-    bEnblPinPWMAzi.off();
+    if (driverId == 0)
+    {
+        aEnblPinPWMAlt->off();
+        bEnblPinPWMAlt->off();
+        aEnblPinPWMAzi->off();
+        bEnblPinPWMAzi->off();
+    }
+#endif
+    std::cout << "Driver stopped" << std::endl;
+}
+
+MotorWorker::~MotorWorker()
+{
+#ifdef RASPBERRYPI
     board.kill();
 #endif
 }
 
 #ifdef RASPBERRYPI
-void MotorWorker::driveDRV8814(pigpio_wcpp::DigitalOutput aPhPinAlt, pigpio_wcpp::DigitalOutput bPhPinAlt,
-                               pigpio_wcpp::DigitalOutput aPhPinAzi, pigpio_wcpp::DigitalOutput bPhPinAzi,
-                               pigpio_wcpp::PWM aEnblPinPWMAlt, pigpio_wcpp::PWM bEnblPinPWMAlt,
-                               pigpio_wcpp::PWM aEnblPinPWMAzi, pigpio_wcpp::PWM bEnblPinPWMAzi,
-                               pigpio_wcpp::DigitalOutput decPin, double timeDeltaD)
+void MotorWorker::driveDRV8814(std::unique_ptr<pigpio_wcpp::DigitalOutput> &aPhPinAlt, std::unique_ptr<pigpio_wcpp::DigitalOutput> &bPhPinAlt,
+                               std::unique_ptr<pigpio_wcpp::DigitalOutput> &aPhPinAzi, std::unique_ptr<pigpio_wcpp::DigitalOutput> &bPhPinAzi,
+                               std::unique_ptr<pigpio_wcpp::PWM> &aEnblPinPWMAlt, std::unique_ptr<pigpio_wcpp::PWM> &bEnblPinPWMAlt,
+                               std::unique_ptr<pigpio_wcpp::PWM> &aEnblPinPWMAzi, std::unique_ptr<pigpio_wcpp::PWM> &bEnblPinPWMAzi,
+                               std::unique_ptr<pigpio_wcpp::DigitalOutput> &decPin, double timeDeltaD)
     {
     bool aPhaseAlt = 0, bPhaseAlt = 0, aPhaseAzi = 0, bPhaseAzi = 0;
     double aPWMAlt, bPWMAlt, aPWMAzi, bPWMAzi;
@@ -154,61 +201,63 @@ void MotorWorker::driveDRV8814(pigpio_wcpp::DigitalOutput aPhPinAlt, pigpio_wcpp
                        aPhaseAlt, bPhaseAlt, aPWMAlt, bPWMAlt);
         calcPinsValuesDRV8814(targetPosAzi, actPosAzi, timeDeltaD, maxSpeedAzi,
                        aPhaseAzi, bPhaseAzi, aPWMAzi, bPWMAzi);
-        aEnblPinPWMAlt.drive(static_cast<uint>(round(aPWMAlt * pwmRange)));
-        bEnblPinPWMAlt.drive(static_cast<uint>(round(bPWMAlt * pwmRange)));
+        aEnblPinPWMAlt->drive(static_cast<uint>(round(aPWMAlt * pwmRange)));
+        bEnblPinPWMAlt->drive(static_cast<uint>(round(bPWMAlt * pwmRange)));
 
         if (aPhaseAlt)
         {
-            aPhPinAlt.high();
+            aPhPinAlt->high();
         }
         else
         {
-            aPhPinAlt.low();
+            aPhPinAlt->low();
         }
         if (bPhaseAlt)
         {
-            bPhPinAlt.high();
+            bPhPinAlt->high();
         }
         else
         {
-            bPhPinAlt.low();
+            bPhPinAlt->low();
         }
 
-        aEnblPinPWMAzi.drive(static_cast<uint>(round(aPWMAzi * pwmRange)));
-        bEnblPinPWMAzi.drive(static_cast<uint>(round(bPWMAzi * pwmRange)));
+        aEnblPinPWMAzi->drive(static_cast<uint>(round(aPWMAzi * pwmRange)));
+        bEnblPinPWMAzi->drive(static_cast<uint>(round(bPWMAzi * pwmRange)));
 
         if (aPhaseAzi)
         {
-            aPhPinAzi.high();
+            aPhPinAzi->high();
         }
         else
         {
-            aPhPinAzi.low();
+            aPhPinAzi->low();
         }
         if (bPhaseAzi)
         {
-            bPhPinAzi.high();
+            bPhPinAzi->high();
         }
         else
         {
-            bPhPinAzi.low();
+            bPhPinAzi->low();
         }
     }
     else
     {
-        aEnblPinPWMAlt.drive(0);
-        bEnblPinPWMAlt.drive(0);
-        aEnblPinPWMAzi.drive(0);
-        bEnblPinPWMAzi.drive(0);
+        aEnblPinPWMAlt->drive(0);
+        bEnblPinPWMAlt->drive(0);
+        aEnblPinPWMAzi->drive(0);
+        bEnblPinPWMAzi->drive(0);
 
     }
     if (fastDecay)
     {
-        decPin.high();
+        if (decPin)
+        {decPin->high();}
     }
     else
     {
-        decPin.low();
+        if (decPin)
+        {decPin->low();}
     }
     usleep(200);
 }
@@ -224,13 +273,13 @@ void MotorWorker::driveDRV8814(pigpio_wcpp::DigitalOutput aPhPinAlt, pigpio_wcpp
 * bPhPinAlt and bPhPinAzi are reused as STEP DRV8825 input
 */
 
-void MotorWorker::driveDRV8825(pigpio_wcpp::DigitalOutput dirPinAlt, pigpio_wcpp::DigitalOutput stepPinAlt,
-                               pigpio_wcpp::DigitalOutput dirPinAzi, pigpio_wcpp::DigitalOutput stepPinAzi,
-                               pigpio_wcpp::PWM aEnblPinPWMAlt,
-                               pigpio_wcpp::PWM aEnblPinPWMAzi,
-                               pigpio_wcpp::DigitalOutput decPin)
+void MotorWorker::driveDRV8825(std::unique_ptr<pigpio_wcpp::DigitalOutput> &dirPinAlt, std::unique_ptr<pigpio_wcpp::DigitalOutput> &stepPinAlt,
+                               std::unique_ptr<pigpio_wcpp::DigitalOutput> &dirPinAzi, std::unique_ptr<pigpio_wcpp::DigitalOutput> &stepPinAzi,
+                               std::unique_ptr<pigpio_wcpp::DigitalOutput> &disablPinAlt,
+                               std::unique_ptr<pigpio_wcpp::DigitalOutput> &disablPinAzi,
+                               std::unique_ptr<pigpio_wcpp::DigitalOutput> &decPin)
 {
-    double enblPWM;
+    bool disabl;
     if (!steppersDisabled)
     {
         for (int motorId = 0; motorId < 2; motorId++)
@@ -250,7 +299,7 @@ void MotorWorker::driveDRV8825(pigpio_wcpp::DigitalOutput dirPinAlt, pigpio_wcpp
 
             if (targetUStep > rUStep)
             {
-                enblPWM = 0.0; //nENBL, LOW state active
+                disabl = 0; //nENBL, LOW state active
                 shutterPressAllowed = false;
                 rUStep++;
                 dirVal[motorId] = 1; // DIR
@@ -261,7 +310,7 @@ void MotorWorker::driveDRV8825(pigpio_wcpp::DigitalOutput dirPinAlt, pigpio_wcpp
             }
             else if (targetUStep < rUStep)
             {
-                enblPWM = 0.0;
+                disabl = 0;
                 shutterPressAllowed = false;
                 rUStep--;
                 dirVal[motorId] = 0;
@@ -272,8 +321,7 @@ void MotorWorker::driveDRV8825(pigpio_wcpp::DigitalOutput dirPinAlt, pigpio_wcpp
             }
             else
             {
-                enblPWM = 0.0;
-                //enblPWM = 1.0 - holdPower; // shutting down H-bridges with PWM
+                disabl = 0;
                 shutterPressAllowed = true;
             }
             realUstep[motorId] = rUStep;
@@ -281,31 +329,43 @@ void MotorWorker::driveDRV8825(pigpio_wcpp::DigitalOutput dirPinAlt, pigpio_wcpp
             if (motorId == 0)
             {
                 if (dirVal[motorId] == 1)
-                    {dirPinAlt.high();}
+                    {dirPinAlt->high();}
                 else
-                    {dirPinAlt.low();}
+                    {dirPinAlt->low();}
                 if (stepVal[motorId] == 1)
-                    {stepPinAlt.high();}
+                    {stepPinAlt->high();}
                 else
-                    {stepPinAlt.low();}
-                aEnblPinPWMAlt.drive(static_cast<uint>(round(enblPWM * pwmRange)));
+                    {stepPinAlt->low();}
+                if (disabl == 1)
+                    {disablPinAlt->high();}
+                else
+                    {disablPinAlt->low();}
             }
             if (motorId == 1)
             {
                 if (dirVal[motorId] == 1)
-                    {dirPinAzi.high();}
+                    {dirPinAzi->high();}
                 else
-                    {dirPinAzi.low();}
+                    {dirPinAzi->low();}
                 if (stepVal[motorId] == 1)
-                    {stepPinAzi.high();}
+                    {stepPinAzi->high();}
                 else
-                    {stepPinAzi.low();}
-                aEnblPinPWMAzi.drive(static_cast<uint>(round(enblPWM * pwmRange)));
+                    {stepPinAzi->low();}
+                if (disabl == 1)
+                    {disablPinAzi->high();}
+                else
+                    {disablPinAzi->low();};
             }
             if (fastDecay)
-            {decPin.high();}
+            {
+                if (decPin)
+                {decPin->high();}
+            }
             else
-            {decPin.low();}
+            {
+                if (decPin)
+                {decPin->low();}
+            }
         }
         double maxSpd = maxSpeedAzi; //Azimuth speed is used for both axes
         int uStepInterval = rint(1e6 / (64 * maxSpd));
@@ -313,9 +373,9 @@ void MotorWorker::driveDRV8825(pigpio_wcpp::DigitalOutput dirPinAlt, pigpio_wcpp
     }
     else
     {
-        aEnblPinPWMAlt.drive(1 * pwmRange);
-        aEnblPinPWMAzi.drive(1 * pwmRange); //DRV8825 nENBL logic is reversed
         //disable steppers
+        disablPinAlt->high();
+        disablPinAzi->high();
     }
 }
 
