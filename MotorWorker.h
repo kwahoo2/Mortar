@@ -83,9 +83,9 @@ private:
                       std::unique_ptr<pigpio_wcpp::DigitalOutput> &decPin, double timeDeltaD);
     void driveDRV8825(std::unique_ptr<pigpio_wcpp::DigitalOutput> &dirPinAlt, std::unique_ptr<pigpio_wcpp::DigitalOutput> &stepPinAlt,
                       std::unique_ptr<pigpio_wcpp::DigitalOutput> &dirPinAzi, std::unique_ptr<pigpio_wcpp::DigitalOutput> &stepPinAzi,
-                      std::unique_ptr<pigpio_wcpp::DigitalOutput> &disablPinAlt,
-                      std::unique_ptr<pigpio_wcpp::DigitalOutput> &disablPinAzi,
-                      std::unique_ptr<pigpio_wcpp::DigitalOutput> &decPin);
+                      std::unique_ptr<pigpio_wcpp::DigitalOutput> &enablPinAlt,
+                      std::unique_ptr<pigpio_wcpp::DigitalOutput> &enablPinAzi,
+                      std::unique_ptr<pigpio_wcpp::DigitalOutput> &decPin, bool reverseEn);
 #endif
 
     double targetPosAlt = 0.0;

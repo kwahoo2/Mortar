@@ -52,11 +52,11 @@ void MotorWorker::run()
 #ifdef RASPBERRYPI
 
     std::unique_ptr<pigpio_wcpp::DigitalOutput> shutterPin, decPin, xI0Pin, xI1Pin, aPhPinAlt, bPhPinAlt, aPhPinAzi, bPhPinAzi;
-    std::unique_ptr<pigpio_wcpp::DigitalOutput> disablPinAlt, dirPinAlt, stepPinAlt, disablPinAzi, dirPinAzi, stepPinAzi;
+    std::unique_ptr<pigpio_wcpp::DigitalOutput> enablPinAlt, dirPinAlt, stepPinAlt, enablPinAzi, dirPinAzi, stepPinAzi;
     std::unique_ptr<pigpio_wcpp::PWM> aEnblPinPWMAlt, bEnblPinPWMAlt, aEnblPinPWMAzi, bEnblPinPWMAzi;
 
 
-    if (driverId == 0)
+    if (driverId == 0) //DRV8814
     {
         decPin = std::make_unique<pigpio_wcpp::DigitalOutput>(22);  //GPIO 22, physical pin 15
         xI0Pin = std::make_unique<pigpio_wcpp::DigitalOutput>(17); //GPIO17, physical pin 11, current regulation
@@ -99,27 +99,48 @@ void MotorWorker::run()
           0    1    71%
           0    0    100%*/
     }
-    if (driverId == 1)
+    if (driverId == 1) //DRV8825
     {
         decPin = std::make_unique<pigpio_wcpp::DigitalOutput>(22);  //GPIO 22, physical pin 15
 
-        disablPinAlt = std::make_unique<pigpio_wcpp::DigitalOutput>(4); //GPIO 4, physical pin 7
+        enablPinAlt = std::make_unique<pigpio_wcpp::DigitalOutput>(4); //GPIO 4, physical pin 7
         dirPinAlt = std::make_unique<pigpio_wcpp::DigitalOutput>(5);  //GPIO 5, physical pin 29
         stepPinAlt = std::make_unique<pigpio_wcpp::DigitalOutput>(6);  //GPIO 6, physical pin 31
 
-        disablPinAzi = std::make_unique<pigpio_wcpp::DigitalOutput>(20); //GPIO 20, physical pin 38
+        enablPinAzi = std::make_unique<pigpio_wcpp::DigitalOutput>(20); //GPIO 20, physical pin 38
         dirPinAzi = std::make_unique<pigpio_wcpp::DigitalOutput>(12);  //GPIO 12, physical pin 32
         stepPinAzi = std::make_unique<pigpio_wcpp::DigitalOutput>(26);  //GPIO 26, physical pin 37
 
         decPin->low();
-        disablPinAlt->high(); //DRV8825 is enabled when low state on nENBL pin
+        enablPinAlt->high(); //DRV8825 is enabled when low state on nENBL pin
         dirPinAlt->low();
         stepPinAlt->low();
 
-        disablPinAzi->high();
+        enablPinAzi->high();
         dirPinAzi->low();
         stepPinAzi->low();
     }
+
+    if (driverId == 2) //DRV8825 Waveshare Hat
+    {
+
+        enablPinAlt = std::make_unique<pigpio_wcpp::DigitalOutput>(12); //GPIO 12, physical pin 32
+        dirPinAlt = std::make_unique<pigpio_wcpp::DigitalOutput>(13);  //GPIO 13, physical pin 33
+        stepPinAlt = std::make_unique<pigpio_wcpp::DigitalOutput>(19);  //GPIO 19, physical pin 35
+
+        enablPinAzi = std::make_unique<pigpio_wcpp::DigitalOutput>(4); //GPIO 4, physical pin 7
+        dirPinAzi = std::make_unique<pigpio_wcpp::DigitalOutput>(24);  //GPIO 24, physical pin 18
+        stepPinAzi = std::make_unique<pigpio_wcpp::DigitalOutput>(18);  //GPIO 18, physical pin 12
+
+        enablPinAlt->low(); //reversed by NPN transistor cutoff
+        dirPinAlt->low();
+        stepPinAlt->low();
+
+        enablPinAzi->low();
+        dirPinAzi->low();
+        stepPinAzi->low();
+    }
+
 
 #else
     std::cout << "Pigpio drivers disabled! Are you running RaspberryPi?" << std::endl;
@@ -159,11 +180,21 @@ void MotorWorker::run()
         }
         if (driverId == 1)
         {
+            bool reversedEnbl = 1;
             driveDRV8825(dirPinAlt, stepPinAlt,
                          dirPinAzi, stepPinAzi,
-                         disablPinAlt,
-                         disablPinAzi,
-                         decPin);
+                         enablPinAlt,
+                         enablPinAzi,
+                         decPin, reversedEnbl);
+        }
+        if (driverId == 2)
+        {
+            bool reversedEnbl = 0;
+            driveDRV8825(dirPinAlt, stepPinAlt,
+                         dirPinAzi, stepPinAzi,
+                         enablPinAlt,
+                         enablPinAzi,
+                         decPin, reversedEnbl);
         }
 #endif
     }
@@ -262,24 +293,13 @@ void MotorWorker::driveDRV8814(std::unique_ptr<pigpio_wcpp::DigitalOutput> &aPhP
     usleep(200);
 }
 
-/* Pin names match DRV8814 nomenclature. When DRV8825 is used instead:
-* decPin is reused
-* xI0Pin and XI1Pin are not used
-* aEnblPinPWMAlt and aEnblPinPWMAzi are reused as nENBL DRV8825 input Note: setting LOW enables indexer logic and H-bridges,
-* since it affects indexer logic it PWM cannot be used to limit power during rotation (but should be possible in stopped state)
-* for completely enabling or disabling steppers
-* bEnblPinPWMAlt and bEnblPinPWMAzi are not used
-* aPhPinAlt and aPhPinAzi are reused as DIR DRV8825 input
-* bPhPinAlt and bPhPinAzi are reused as STEP DRV8825 input
-*/
-
 void MotorWorker::driveDRV8825(std::unique_ptr<pigpio_wcpp::DigitalOutput> &dirPinAlt, std::unique_ptr<pigpio_wcpp::DigitalOutput> &stepPinAlt,
                                std::unique_ptr<pigpio_wcpp::DigitalOutput> &dirPinAzi, std::unique_ptr<pigpio_wcpp::DigitalOutput> &stepPinAzi,
-                               std::unique_ptr<pigpio_wcpp::DigitalOutput> &disablPinAlt,
-                               std::unique_ptr<pigpio_wcpp::DigitalOutput> &disablPinAzi,
-                               std::unique_ptr<pigpio_wcpp::DigitalOutput> &decPin)
+                               std::unique_ptr<pigpio_wcpp::DigitalOutput> &enablPinAlt,
+                               std::unique_ptr<pigpio_wcpp::DigitalOutput> &enablPinAzi,
+                               std::unique_ptr<pigpio_wcpp::DigitalOutput> &decPin, bool reversedEn)
 {
-    bool disabl;
+    bool enabl;
     if (!steppersDisabled)
     {
         for (int motorId = 0; motorId < 2; motorId++)
@@ -299,7 +319,7 @@ void MotorWorker::driveDRV8825(std::unique_ptr<pigpio_wcpp::DigitalOutput> &dirP
 
             if (targetUStep > rUStep)
             {
-                disabl = 0; //nENBL, LOW state active
+                enabl = !reversedEn; //nENBL, LOW state active
                 shutterPressAllowed = false;
                 rUStep++;
                 dirVal[motorId] = 1; // DIR
@@ -310,7 +330,7 @@ void MotorWorker::driveDRV8825(std::unique_ptr<pigpio_wcpp::DigitalOutput> &dirP
             }
             else if (targetUStep < rUStep)
             {
-                disabl = 0;
+                enabl = !reversedEn;
                 shutterPressAllowed = false;
                 rUStep--;
                 dirVal[motorId] = 0;
@@ -321,7 +341,7 @@ void MotorWorker::driveDRV8825(std::unique_ptr<pigpio_wcpp::DigitalOutput> &dirP
             }
             else
             {
-                disabl = 0;
+                enabl = !reversedEn;
                 shutterPressAllowed = true;
             }
             realUstep[motorId] = rUStep;
@@ -336,10 +356,10 @@ void MotorWorker::driveDRV8825(std::unique_ptr<pigpio_wcpp::DigitalOutput> &dirP
                     {stepPinAlt->high();}
                 else
                     {stepPinAlt->low();}
-                if (disabl == 1)
-                    {disablPinAlt->high();}
+                if (enabl == 1)
+                    {enablPinAlt->high();}
                 else
-                    {disablPinAlt->low();}
+                    {enablPinAlt->low();}
             }
             if (motorId == 1)
             {
@@ -351,10 +371,10 @@ void MotorWorker::driveDRV8825(std::unique_ptr<pigpio_wcpp::DigitalOutput> &dirP
                     {stepPinAzi->high();}
                 else
                     {stepPinAzi->low();}
-                if (disabl == 1)
-                    {disablPinAzi->high();}
+                if (enabl == 1)
+                    {enablPinAzi->high();}
                 else
-                    {disablPinAzi->low();};
+                    {enablPinAzi->low();};
             }
             if (fastDecay)
             {
@@ -374,8 +394,16 @@ void MotorWorker::driveDRV8825(std::unique_ptr<pigpio_wcpp::DigitalOutput> &dirP
     else
     {
         //disable steppers
-        disablPinAlt->high();
-        disablPinAzi->high();
+        if (reversedEn)
+        {
+            enablPinAlt->high();
+            enablPinAzi->high();
+        }
+        else
+        {
+            enablPinAlt->low();
+            enablPinAzi->low();
+        }
     }
 }
 

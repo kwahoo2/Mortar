@@ -44,6 +44,7 @@ PrefsDialog::PrefsDialog(QWidget *parent) :
     telescopeName ="New Telescope 1";
     ui->driverComboBox->addItem("DRV8814");
     ui->driverComboBox->addItem("DRV8825");
+    ui->driverComboBox->addItem("DRV8825 Hat");
 }
 
 void PrefsDialog::loadSettings()
@@ -322,11 +323,30 @@ void PrefsDialog::setActiveBoxes(int driverid)
         ui->altSpeedSpinBox->setEnabled(true);
         ui->holdPWMSpinBox->setEnabled(true);
         ui->runPWMSpinBox->setEnabled(true);
+        ui->decayCheckBox->setEnabled(true);
+        ui->pinoutLabel->setText("Pinout (physical pins):\n"
+                                 "[ALT] APHASE: 29, BPHASE: 31, AENBL:  7, BENBL: 12\n"
+                                 "[AZI] APHASE: 37, BPHASE: 32, AENBL: 38, BENBL: 40\n"
+                                 "I0: 11, I1: 13, DECAY: 15");
         break;
     case 1:
         ui->altSpeedSpinBox->setEnabled(false);
         ui->holdPWMSpinBox->setEnabled(false);
         ui->runPWMSpinBox->setEnabled(false);
+        ui->decayCheckBox->setEnabled(true);
+        ui->pinoutLabel->setText("Pinout (physical pins):\n"
+                                 "[ALT] DIR: 29, STEP: 31, ENBL:  7\n"
+                                 "[AZI] DIR: 32, STEP: 37, ENBL: 38,\n"
+                                 "DECAY: 15");
+        break;
+    case 2:
+        ui->altSpeedSpinBox->setEnabled(false);
+        ui->holdPWMSpinBox->setEnabled(false);
+        ui->runPWMSpinBox->setEnabled(false);
+        ui->decayCheckBox->setEnabled(false);
+        ui->pinoutLabel->setText("Pinout (physical pins):\n"
+                                 "[ALT] DIR: 33, STEP: 35, ENBL: 32\n"
+                                 "[AZI] DIR: 18, STEP: 12, ENBL:  7");
         break;
     default:
         break;
