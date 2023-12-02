@@ -90,6 +90,11 @@ public slots:
     void setSpeedAlt(int val);
     void setSpeedAzi(int val);
     void setStepMul(double val);
+    void moveUpPressed(bool val);
+    void moveDownPressed(bool val);
+    void moveLeftPressed(bool val);
+    void moveRightPressed(bool val);
+
 
 };
 

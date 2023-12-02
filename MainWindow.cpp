@@ -28,6 +28,7 @@
  */
 
 #include "MainWindow.h"
+#include "qcommonstyle.h"
 #include "ui_MainWindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -109,6 +110,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->powerDownButton->setCheckable(true);
     ui->startStopButton->setCheckable(true);
     ui->shutterModeButton->setCheckable(true);
+
+    QCommonStyle style;
+    ui->altUpButton->setIcon(style.standardIcon(QStyle::SP_ArrowUp));
+    ui->altDownButton->setIcon(style.standardIcon(QStyle::SP_ArrowDown));
+    ui->aziLeftButton->setIcon(style.standardIcon(QStyle::SP_ArrowBack));
+    ui->aziRightButton->setIcon(style.standardIcon(QStyle::SP_ArrowForward));
 
     this->setWindowFlags(this->windowFlags() | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint); //don't allow to be hidden by Stellarium in window mode
 
@@ -352,3 +359,48 @@ void MainWindow::on_selObjRadioButton_clicked(bool checked)
         stelin->trackSelectedObject();
     }
 }
+
+void MainWindow::on_aziLeftButton_pressed()
+{
+    gamepadin->moveLeftPressed(true);
+}
+
+
+void MainWindow::on_aziRightButton_pressed()
+{
+    gamepadin->moveRightPressed(true);
+}
+
+
+void MainWindow::on_aziLeftButton_released()
+{
+    gamepadin->moveLeftPressed(false);
+}
+
+void MainWindow::on_aziRightButton_released()
+{
+    gamepadin->moveRightPressed(false);
+}
+
+void MainWindow::on_altUpButton_pressed()
+{
+    gamepadin->moveUpPressed(true);
+}
+
+void MainWindow::on_altDownButton_pressed()
+{
+    gamepadin->moveDownPressed(true);
+}
+
+void MainWindow::on_altUpButton_released()
+{
+    gamepadin->moveUpPressed(false);
+}
+
+void MainWindow::on_altDownButton_released()
+{
+    gamepadin->moveDownPressed(false);
+}
+
+
+

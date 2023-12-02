@@ -104,5 +104,15 @@ private slots:
     void on_shutterModeButton_toggled(bool checked);
     void on_virtTeleRadioButton_toggled(bool checked);
     void on_selObjRadioButton_clicked(bool checked);
+
+    void on_aziLeftButton_pressed();
+    void on_aziRightButton_pressed();
+    void on_aziLeftButton_released();
+    void on_aziRightButton_released();
+
+    void on_altUpButton_pressed();
+    void on_altDownButton_pressed();
+    void on_altUpButton_released();
+    void on_altDownButton_released();
 };
 #endif // MAINWINDOW_H

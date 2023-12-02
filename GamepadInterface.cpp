@@ -36,21 +36,21 @@ GamepadInterface::GamepadInterface(QObject *parent) : QObject(parent), gamepad(n
     auto gamepads = QGamepadManager::instance()->connectedGamepads();
     if (gamepads.isEmpty()) {
         qDebug() << "Did not find any connected gamepads";
-        return;
     }
+    else
+    {
+        gamepad = new QGamepad(*gamepads.begin(), this);
 
-    gamepad = new QGamepad(*gamepads.begin(), this);
+        connect(gamepad, SIGNAL(axisLeftXChanged(double)), this, SLOT(axisXChanged(double)));
+        connect(gamepad, SIGNAL(axisLeftYChanged(double)), this, SLOT(axisYChanged(double)));
 
-    connect(gamepad, SIGNAL(axisLeftXChanged(double)), this, SLOT(axisXChanged(double)));
-    connect(gamepad, SIGNAL(axisLeftYChanged(double)), this, SLOT(axisYChanged(double)));
+        connect(gamepad, SIGNAL(buttonLeftChanged(bool)), this, SLOT(leftPressed(bool)));
+        connect(gamepad, SIGNAL(buttonRightChanged(bool)), this, SLOT(rightPressed(bool)));
+        connect(gamepad, SIGNAL(buttonUpChanged(bool)), this, SLOT(upPressed(bool)));
+        connect(gamepad, SIGNAL(buttonDownChanged(bool)), this, SLOT(downPressed(bool)));
 
-    connect(gamepad, SIGNAL(buttonLeftChanged(bool)), this, SLOT(leftPressed(bool)));
-    connect(gamepad, SIGNAL(buttonRightChanged(bool)), this, SLOT(rightPressed(bool)));
-    connect(gamepad, SIGNAL(buttonUpChanged(bool)), this, SLOT(upPressed(bool)));
-    connect(gamepad, SIGNAL(buttonDownChanged(bool)), this, SLOT(downPressed(bool)));
-
-    connect(gamepad, SIGNAL(buttonR2Changed(double)), this, SLOT(R2Changed(double)));
-
+        connect(gamepad, SIGNAL(buttonR2Changed(double)), this, SLOT(R2Changed(double)));
+    }
     pollTimer = new QTimer; //timer for polling GPIO buttons
     pollTimer->setInterval(poolInterval);
     connect(pollTimer, SIGNAL(timeout()), this, SLOT(pollButtons()));
@@ -60,61 +60,72 @@ GamepadInterface::GamepadInterface(QObject *parent) : QObject(parent), gamepad(n
 
 void GamepadInterface::axisXChanged(double val)
 {
-    qDebug() << "X" << val;
     xAxisVal = val;
 }
 
 void GamepadInterface::axisYChanged(double val)
 {
-    qDebug() << "Y" << val;
     yAxisVal = val;
 }
 
 void GamepadInterface::leftPressed(bool val)
 {
-     qDebug() << "Left" << val;
      if (val)
         emit aziMoveStep(-dPadStepMul * aziSpeed * (static_cast<double>(poolInterval) / 1000.0));
 }
 void GamepadInterface::rightPressed(bool val)
 {
-    qDebug() << "Right" << val;
     if (val)
        emit aziMoveStep(dPadStepMul * aziSpeed * (static_cast<double>(poolInterval) / 1000.0));
 }
 void GamepadInterface::upPressed(bool val)
 {
-    qDebug() << "Up" << val;
     if (val)
        emit altMoveStep(dPadStepMul * altSpeed * (static_cast<double>(poolInterval) / 1000.0));
 }
 void GamepadInterface::downPressed(bool val)
 {
-     qDebug() << "Down" << val;
      if (val)
         emit altMoveStep(-dPadStepMul * altSpeed * (static_cast<double>(poolInterval) / 1000.0));
 }
 
 void GamepadInterface::R2Changed(double val)
 {
-    qDebug() << "R2" << val;
     R2Val = val;
+}
+
+void GamepadInterface::moveUpPressed(bool val)
+{
+    this->upPressed(val);
+    yAxisVal = static_cast<double>(-val);
+}
+void GamepadInterface::moveDownPressed(bool val)
+{
+    this->downPressed(val);
+    yAxisVal = static_cast<double>(val);
+}
+void GamepadInterface::moveLeftPressed(bool val)
+{
+    this->leftPressed(val);
+    xAxisVal = static_cast<double>(-val);
+}
+void GamepadInterface::moveRightPressed(bool val)
+{
+    this->rightPressed(val);
+    xAxisVal = static_cast<double>(val);
 }
 
 void GamepadInterface::setSpeedAlt(int val)
 {
-    qDebug() << "Gamepad Alt speed set: " << val;
     altSpeed = val;
 }
 void GamepadInterface::setSpeedAzi(int val)
 {
-    qDebug() << "Gamepad Azi speed set: " << val;
     aziSpeed = val;
 }
 
 void GamepadInterface::setStepMul(double val)
 {
-    qDebug() << "DPAD step multiplier set: " << val;
      dPadStepMul = val;
 }
 
@@ -147,6 +158,9 @@ void GamepadInterface::pollButtons()
 GamepadInterface::~GamepadInterface()
 {
     delete x;
-    delete gamepad;
+    if (gamepad)
+    {
+        delete gamepad;
+    }
 }
 
