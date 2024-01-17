@@ -28,7 +28,7 @@ I wanted to make a simple to use interface to drive a dobsonian telescope. It sh
 * Raspberry Pi
 * Two bipolar stepper motors
 * Two stepper motor drivers DRV8814 OR two DRV8825 drivers (L298 is deprecated in master, see wiringpi-legacy branch)
-* Gamepad
+* (Optional) Gamepad
 * (Optional) GPS module
 * (Optional) touch screen
 
@@ -104,6 +104,7 @@ In the Mortar open the preferences and set the telescope name from Stellarium. I
 [prefs]: https://raw.githubusercontent.com/kwahoo2/Mortar/master/.github/images/remote.png "Mortar preferences" 
 
 You may use a gamepad to move your telescope. Analog stick works as coarse adjustment, dpad moves a stepper motor by a small (size is adjustable in options) step. R2 button emulates F11, and it is useful for Stellarium fullscreen toggle.
+Alternatively, if you do not have a gamepad, you can move the telescope with arrows in the main window.
 
 ## Telescope calibration and observation
 
@@ -111,7 +112,7 @@ You may use a gamepad to move your telescope. Analog stick works as coarse adjus
 
 2. If you have a GPS module connected, you should see GPS time, date and location values in Mortar. Click "Sync Stellarium with GPS" to correct your time and position. This step is optional. You may set these values manually in Stellarium. 
 
-3. Point the telescope on an object on the sky. You may use gamepad input for this. Point the virtual telescope in the Stellarium on the same object. 
+3. Point the telescope on an object on the sky. You may use gamepad input for this or click arrows in the Mortar window. Point the virtual telescope in the Stellarium on the same object.
 
 4. Click "Sync with Stellarium". Both programs are synced now. Real telescope will follow the virtual one.
 
