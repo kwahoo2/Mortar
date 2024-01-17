@@ -1,5 +1,6 @@
 # Mortar
-Mortar is a software to drive an altazimuth mounted (eg. dobsonian) telescope using input from Stellarium. Mortar runs on a Raspberry Pi and it is connected with Stellarium running on the same Pi, or on a remote computer. 
+Mortar is a software to drive an altazimuth mounted (eg. dobsonian) telescope using input from Stellarium. Mortar runs on a Raspberry Pi and it is connected with Stellarium running on the same Pi, or on a remote computer.
+It can use popular DRV8825 or less common DRV8814 drivers.
 
 ## Background
 
@@ -26,11 +27,20 @@ I wanted to make a simple to use interface to drive a dobsonian telescope. It sh
 * 3D-printed parts and bearings - see mechanical/teleskop.FCStd Parts are made with [FreeCAD Assembly3 branch.](https://github.com/realthunder/FreeCAD_assembly3/releases)
 * Raspberry Pi
 * Two bipolar stepper motors
-* Two stepper motor drivers DRV8814 (L298 is deprecated in master, see wiringpi-legacy branch)
+* Two stepper motor drivers DRV8814 OR two DRV8825 drivers (L298 is deprecated in master, see wiringpi-legacy branch)
 * Gamepad
 * (Optional) GPS module
 * (Optional) touch screen
 
+## DRV8825 driver boards
+Mortar can use DRV8825 drivers, one per motor. User chooses between DRV8814 and DRV8825 selecting the required one in the preferences. Pinout is also shown here.
+![Driver select][driver-select]
+
+[driver-select]: https://raw.githubusercontent.com/kwahoo2/Mortar/master/.github/images/driver-select.png "Selecting stepper driver"
+
+"DRV8825 Hat" has pinout adjusted for single board [WaveShare Stepper Motor HAT](https://www.waveshare.com/wiki/Stepper_Motor_HAT)
+
+## Custom DRV8814 board
 An integrated shield board for Raspberry Pi is available in a separate repository [MortarShield.](https://github.com/twizzter/MortarShield/)
 
 ![Mortar Shield](https://github.com/twizzter/MortarShield/blob/main/ms11.png?raw=true)
