@@ -24,7 +24,7 @@ I wanted to make a simple to use interface to drive a dobsonian telescope. It sh
 ### Hardware
 
 * Altzimuth telescope
-* 3D-printed parts and bearings - see mechanical/teleskop.FCStd Parts are made with [FreeCAD Assembly3 branch.](https://github.com/realthunder/FreeCAD_assembly3/releases)
+* 3D-printed parts and bearings - see mechanical/telescope.FCStd. Parts are compatible with FreeCAD 1.1rc1.
 * Raspberry Pi
 * Two bipolar stepper motors
 * Two stepper motor drivers DRV8814 OR two DRV8825 drivers (L298 is deprecated in master, see wiringpi-legacy branch)
