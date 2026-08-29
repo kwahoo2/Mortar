@@ -27,30 +27,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <iostream>
 #include "GamepadInterface.h"
 
 GamepadInterface::GamepadInterface(QObject *parent) : QObject(parent), gamepad(nullptr)
 {
     x = xdo_new(":0.0"); //for emulating X keypresses
 
-    auto gamepads = QGamepadManager::instance()->connectedGamepads();
-    if (gamepads.isEmpty()) {
-        qDebug() << "Did not find any connected gamepads";
+    if (!SDL_Init(SDL_INIT_GAMEPAD)) {
+        qWarning() << "SDL_Init Error:" << SDL_GetError();
+        return;
     }
-    else
-    {
-        gamepad = new QGamepad(*gamepads.begin(), this);
 
-        connect(gamepad, SIGNAL(axisLeftXChanged(double)), this, SLOT(axisXChanged(double)));
-        connect(gamepad, SIGNAL(axisLeftYChanged(double)), this, SLOT(axisYChanged(double)));
-
-        connect(gamepad, SIGNAL(buttonLeftChanged(bool)), this, SLOT(leftPressed(bool)));
-        connect(gamepad, SIGNAL(buttonRightChanged(bool)), this, SLOT(rightPressed(bool)));
-        connect(gamepad, SIGNAL(buttonUpChanged(bool)), this, SLOT(upPressed(bool)));
-        connect(gamepad, SIGNAL(buttonDownChanged(bool)), this, SLOT(downPressed(bool)));
-
-        connect(gamepad, SIGNAL(buttonR2Changed(double)), this, SLOT(R2Changed(double)));
-    }
     pollTimer = new QTimer; //timer for polling GPIO buttons
     pollTimer->setInterval(poolInterval);
     connect(pollTimer, SIGNAL(timeout()), this, SLOT(pollButtons()));
@@ -70,22 +58,22 @@ void GamepadInterface::axisYChanged(double val)
 
 void GamepadInterface::leftPressed(bool val)
 {
-     if (val)
+    if (val)
         emit aziMoveStep(-dPadStepMul * aziSpeed * (static_cast<double>(poolInterval) / 1000.0));
 }
 void GamepadInterface::rightPressed(bool val)
 {
     if (val)
-       emit aziMoveStep(dPadStepMul * aziSpeed * (static_cast<double>(poolInterval) / 1000.0));
+        emit aziMoveStep(dPadStepMul * aziSpeed * (static_cast<double>(poolInterval) / 1000.0));
 }
 void GamepadInterface::upPressed(bool val)
 {
     if (val)
-       emit altMoveStep(dPadStepMul * altSpeed * (static_cast<double>(poolInterval) / 1000.0));
+        emit altMoveStep(dPadStepMul * altSpeed * (static_cast<double>(poolInterval) / 1000.0));
 }
 void GamepadInterface::downPressed(bool val)
 {
-     if (val)
+    if (val)
         emit altMoveStep(-dPadStepMul * altSpeed * (static_cast<double>(poolInterval) / 1000.0));
 }
 
@@ -126,13 +114,69 @@ void GamepadInterface::setSpeedAzi(int val)
 
 void GamepadInterface::setStepMul(double val)
 {
-     dPadStepMul = val;
+    dPadStepMul = val;
 }
-
-
 
 void GamepadInterface::pollButtons()
 {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) { // poll until all events are handled
+        if (event.type == SDL_EVENT_GAMEPAD_ADDED) {
+            int device_index = event.gdevice.which;
+            SDL_Gamepad *newGamepad = SDL_OpenGamepad(device_index);
+            if (newGamepad) {
+                gamepads.push_back(newGamepad);
+                std::cout << "Gamepad connected: " << SDL_GetGamepadName(newGamepad)
+                          << " (ID: " << device_index << ")" << std::endl;
+                if (gamepads.size() == 1) { //connect only the first gamepad
+                    gamepad = gamepads[0];
+                    connect(this, SIGNAL(axisLeftXChanged(double)), this, SLOT(axisXChanged(double)));
+                    connect(this, SIGNAL(axisLeftYChanged(double)), this, SLOT(axisYChanged(double)));
+                    connect(this, SIGNAL(buttonLeftChanged(bool)), this, SLOT(leftPressed(bool)));
+                    connect(this, SIGNAL(buttonRightChanged(bool)), this, SLOT(rightPressed(bool)));
+                    connect(this, SIGNAL(buttonUpChanged(bool)), this, SLOT(upPressed(bool)));
+                    connect(this, SIGNAL(buttonDownChanged(bool)), this, SLOT(downPressed(bool)));
+                    connect(this, SIGNAL(buttonR2Changed(double)), this, SLOT(R2Changed(double)));
+                }
+
+            }
+        } else if (event.type == SDL_EVENT_GAMEPAD_REMOVED) {
+            uint instance_id = event.gdevice.which;
+            for (auto it = gamepads.begin(); it != gamepads.end(); ++it) {
+                if (SDL_GetGamepadID(*it) == instance_id) {
+                    std::cout << "Gamepad disconnected " << SDL_GetGamepadName(*it) << std::endl;
+                    SDL_CloseGamepad(*it);
+                    gamepads.erase(it);
+                    break;
+                }
+            }
+            if (!gamepads.size()) {
+                gamepad = nullptr;
+                disconnect(this, SIGNAL(axisLeftXChanged(double)), this, SLOT(axisXChanged(double)));
+            }
+        }
+    }
+    if (gamepad) {
+        double leftX = static_cast<double>(SDL_GetGamepadAxis(gamepad, SDL_GAMEPAD_AXIS_LEFTX))
+        / gamepad_axis_range;
+        double leftY = static_cast<double>(SDL_GetGamepadAxis(gamepad, SDL_GAMEPAD_AXIS_LEFTY))
+                       / gamepad_axis_range;
+        emit(axisLeftXChanged(leftX));
+        emit(axisLeftYChanged(leftY));
+        bool buttonLeft = SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_DPAD_LEFT);
+        bool buttonRight = SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_DPAD_RIGHT);
+        bool buttonUp = SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_DPAD_UP);
+        bool buttonDown = SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_DPAD_DOWN);
+        emit(buttonLeftChanged(buttonLeft));
+        emit(buttonRightChanged(buttonRight));
+        emit(buttonUpChanged(buttonUp));
+        emit(buttonDownChanged(buttonDown));
+        double rightTrigger = static_cast<double>(
+                                  SDL_GetGamepadAxis(gamepad, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER))
+                              / gamepad_axis_range;
+        bool buttonR2 = rightTrigger > 0.7;
+        emit(buttonR2Changed(buttonR2));
+    }
     pollTimer->setInterval(poolInterval);
     if (R2Val > 0.9)
     {
@@ -144,23 +188,22 @@ void GamepadInterface::pollButtons()
     if (yAxisVal > deadzone || yAxisVal < -deadzone)
     {
 
-       emit altMoveStep(-yAxisVal * altSpeed * (static_cast<double>(poolInterval) / 1000.0)); //Yaxis is reversed
+        emit altMoveStep(-yAxisVal * altSpeed * (static_cast<double>(poolInterval) / 1000.0)); //Yaxis is reversed
     }
 
     if (xAxisVal > deadzone || xAxisVal < -deadzone)
     {
-       emit aziMoveStep(xAxisVal * aziSpeed * (static_cast<double>(poolInterval) / 1000.0));
+        emit aziMoveStep(xAxisVal * aziSpeed * (static_cast<double>(poolInterval) / 1000.0));
     }
 
 }
 
-
 GamepadInterface::~GamepadInterface()
 {
-    delete x;
-    if (gamepad)
-    {
-        delete gamepad;
+    for (const auto& gamepad : gamepads) {
+        SDL_CloseGamepad(gamepad);
     }
+    SDL_Quit();
+    delete x;
 }
 

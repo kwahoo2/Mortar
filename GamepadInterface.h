@@ -49,10 +49,12 @@ extern "C" { //since xdo is a C not a C++ library
 #undef Complex
 
 #include <QObject>
-#include <QtGamepad/QGamepad>
 #include <QDebug>
 #include <QTimer>
-#include <cmath>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_gamepad.h>
+
+static const float gamepad_axis_range = 32768.0f;
 
 class GamepadInterface : public QObject
 {
@@ -65,6 +67,14 @@ signals:
     void aziMoveStep(double val);
     void altMoveStep(double val);
 
+    void axisLeftXChanged(double val);
+    void axisLeftYChanged(double val);
+    void buttonLeftChanged(bool val);
+    void buttonRightChanged(bool val);
+    void buttonUpChanged(bool val);
+    void buttonDownChanged(bool val);
+    void buttonR2Changed(double val);
+
 private:
     double R2Val = 0.0, xAxisVal = 0.0, yAxisVal = 0.0;
     int poolInterval = 100;
@@ -72,9 +82,10 @@ private:
     int altSpeed = 100, aziSpeed = 100; //these values should be syncronized with motordriver values
     double dPadStepMul = 0.1;
 
-    QGamepad *gamepad;
     xdo_t *x;
     QTimer *pollTimer;
+    std::vector<SDL_Gamepad *> gamepads;
+    SDL_Gamepad *gamepad; // the first gamepad
 
 private slots:
     void axisXChanged(double val);
@@ -94,6 +105,7 @@ public slots:
     void moveDownPressed(bool val);
     void moveLeftPressed(bool val);
     void moveRightPressed(bool val);
+
 
 
 };

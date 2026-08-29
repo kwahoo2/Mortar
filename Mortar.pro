@@ -1,4 +1,4 @@
-QT       += core gui network gamepad charts
+QT       += core gui network charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport
 
@@ -41,7 +41,7 @@ FORMS += \
     MainWindow.ui \
     PrefsDialog.ui
 
-LIBS += -lxdo
+LIBS += -lxdo -lSDL3
 
 linux {
     contains(QMAKE_HOST.arch, aarch.*):{
