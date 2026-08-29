@@ -2,6 +2,8 @@
 #include "ui_CorrectionTable.h"
 #include <QChart>
 #include <QLineSeries>
+#include <QFileDialog>
+#include <QMessageBox>
 
 CorrectionTable::CorrectionTable(QWidget *parent) :
     QDialog(parent),

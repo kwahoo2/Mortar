@@ -32,8 +32,9 @@
 
 GamepadInterface::GamepadInterface(QObject *parent) : QObject(parent), gamepad(nullptr)
 {
+#ifdef HASXDO
     x = xdo_new(":0.0"); //for emulating X keypresses
-
+#endif
     if (!SDL_Init(SDL_INIT_GAMEPAD)) {
         qWarning() << "SDL_Init Error:" << SDL_GetError();
         return;
@@ -182,7 +183,9 @@ void GamepadInterface::pollButtons()
     {
         pollTimer->setInterval(1000); //dont allow toggle to often
         qDebug() << "F11 generated";
+#ifdef HASXDO
         xdo_send_keysequence_window(x, CURRENTWINDOW, "F11", 0); //F11 toggles Stellarium fullscreen and windowed mode
+#endif
     }
 
     if (yAxisVal > deadzone || yAxisVal < -deadzone)
@@ -204,6 +207,8 @@ GamepadInterface::~GamepadInterface()
         SDL_CloseGamepad(gamepad);
     }
     SDL_Quit();
+#ifdef HASXDO
     delete x;
+#endif
 }
 

@@ -283,7 +283,7 @@ void PrefsDialog::addPortsNames(QList <QSerialPortInfo> ports)
     emit givePortSelection(ui->portsComboBox->itemData(0, Qt::DisplayRole).toString());
     loadPortSettings();
 }
-void PrefsDialog::on_portsComboBox_activated(const QString &arg1)
+void PrefsDialog::on_portsComboBox_textActivated(const QString &arg1)
 {
     settings.setValue("Common/port", arg1);
     emit givePortSelection(arg1);
@@ -308,7 +308,7 @@ void PrefsDialog::on_pointsDistSpinBox_valueChanged(double arg1)
     emit setPointsMinDist(arg1);
 }
 
-void PrefsDialog::on_driverComboBox_activated(const QString &arg1)
+void PrefsDialog::on_driverComboBox_textActivated(const QString &arg1)
 {
     settings.setValue("Common/driver", arg1);
     int id = ui->driverComboBox->currentIndex();
@@ -353,3 +353,4 @@ void PrefsDialog::setActiveBoxes(int driverid)
     }
 }
 
+void PrefsDialog::on_portsComboBox_activated(int index) {}

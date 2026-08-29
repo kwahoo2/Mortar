@@ -30,11 +30,7 @@
 #ifndef MOTORDRIVER_H
 #define MOTORDRIVER_H
 
-#ifdef __arm__
-#define RASPBERRYPI
-#endif
-
-#include <MotorWorker.h>
+#include "MotorWorker.h"
 
 #include <QObject>
 #include <QDebug>

@@ -30,9 +30,11 @@
 #ifndef GAMEPADINTERFACE_H
 #define GAMEPADINTERFACE_H
 
+#ifdef HASXDO
 extern "C" { //since xdo is a C not a C++ library
 #include <xdo.h>
 }
+#endif
 #undef Bool //workaround to X11 and Qt conflicts
 #undef CursorShape
 #undef Expose
@@ -81,8 +83,9 @@ private:
     double deadzone = 0.1;
     int altSpeed = 100, aziSpeed = 100; //these values should be syncronized with motordriver values
     double dPadStepMul = 0.1;
-
+#ifdef HASXDO
     xdo_t *x;
+#endif
     QTimer *pollTimer;
     std::vector<SDL_Gamepad *> gamepads;
     SDL_Gamepad *gamepad; // the first gamepad
@@ -105,8 +108,6 @@ public slots:
     void moveDownPressed(bool val);
     void moveLeftPressed(bool val);
     void moveRightPressed(bool val);
-
-
 
 };
 

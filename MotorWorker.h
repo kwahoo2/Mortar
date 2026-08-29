@@ -30,14 +30,10 @@
 #ifndef MOTORWORKER_H
 #define MOTORWORKER_H
 
-#ifdef __ARM_ARCH
-#define RASPBERRYPI
-#endif
-
-#ifdef RASPBERRYPI
-#include <CBoard.h>
-#include <CDigitalOutput.h>
-#include <CPWM.h>
+#ifdef HASPIGPIO
+#include "CBoard.h"
+#include "CDigitalOutput.h"
+#include "CPWM.h"
 #endif
 
 #include <QThread>
@@ -71,7 +67,7 @@ signals:
 private:
     void run() override;
     volatile bool worker_stopped = false;
-#ifdef RASPBERRYPI
+#ifdef HASPIGPIO
     pigpio_wcpp::Board board;
     void calcPinsValuesDRV8814(double targetPos, double &actPos,
                         double timeDeltaD, double maxSpeed,

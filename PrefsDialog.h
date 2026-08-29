@@ -83,12 +83,14 @@ private slots:
     void on_runPWMSpinBox_valueChanged(int arg1);
     void on_hostLineEdit_textChanged(const QString &arg1);
     void on_telescopeLineEdit_textChanged(const QString &arg1);
-    void on_portsComboBox_activated(const QString &arg1);
+    void on_portsComboBox_textActivated(const QString &arg1);
     void on_decayCheckBox_toggled(bool checked);
     void on_dpadStepSpinBox_valueChanged(double arg1);
     void on_pointsDistSpinBox_valueChanged(double arg1);
-    void on_driverComboBox_activated(const QString &arg1);
+    void on_driverComboBox_textActivated(const QString &arg1);
     void setActiveBoxes(int driverid);
+
+    void on_portsComboBox_activated(int index);
 
 private:
     double stepsPerMotorRotatAzi, stepsPerMotorRotatAlt;

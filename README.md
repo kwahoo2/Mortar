@@ -14,11 +14,11 @@ I wanted to make a simple to use interface to drive a dobsonian telescope. It sh
 
 * Stellarium
 * pigpio library
-* Qt and qmake
+* cmake
+* Qt
 * Qt serialport module
-* Qt gamepad module
 * Qt charts module
-* xdo3 library
+* xdo3 library (optional)
 
 
 ### Hardware
@@ -80,10 +80,12 @@ If you want use GPS, enable UART in the rpi-config utility.
 Download, compile and run the software.
 
 ```
-sudo apt install qtbase5-dev libqt5gamepad5-dev libqt5serialport5-dev libqt5charts5-dev libxdo-dev pigpio
+sudo apt install qtbase5-dev libqt5serialport5-dev libqt5charts5-dev libxdo-dev pigpio libsdl3-dev
 git clone --recurse-submodules https://github.com/kwahoo2/Mortar 
 cd Mortar
-qmake -makefile -o Makefile Mortar.pro
+mkdir -p build
+cd build
+cmake ..
 make
 sudo ./Mortar
 ```

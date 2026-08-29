@@ -38,7 +38,7 @@
 MotorWorker::MotorWorker(QObject *parent)
                         : QThread(parent)
 {
-#ifdef RASPBERRYPI
+#ifdef HASPIGPIO
     board = pigpio_wcpp::Board();
     board.initialise();
     qDebug() << "Board version: " << board.version();
@@ -49,7 +49,7 @@ void MotorWorker::run()
 {
     worker_stopped = false;
     std::cout <<"Using driver id: " << driverId << std::endl;
-#ifdef RASPBERRYPI
+#ifdef HASPIGPIO
 
     std::unique_ptr<pigpio_wcpp::DigitalOutput> shutterPin, decPin, xI0Pin, xI1Pin, aPhPinAlt, bPhPinAlt, aPhPinAzi, bPhPinAzi;
     std::unique_ptr<pigpio_wcpp::DigitalOutput> enablPinAlt, dirPinAlt, stepPinAlt, enablPinAzi, dirPinAzi, stepPinAzi;
@@ -143,7 +143,7 @@ void MotorWorker::run()
 
 
 #else
-    std::cout << "Pigpio drivers disabled! Are you running RaspberryPi?" << std::endl;
+    std::cout << "Pigpio drivers disabled! GPIO output not available." << std::endl;
 #endif
     QElapsedTimer elapsedTimer;
     elapsedTimer.start();
@@ -158,7 +158,7 @@ void MotorWorker::run()
        //qDebug() << "MotorWorker Azi target pos: " << targetPosAzi << "act: " <<actPosAzi;
        //qDebug() << "MotorWorker Alt target pos: " << targetPosAlt << "act: " <<actPosAlt;
 
-#ifdef RASPBERRYPI
+#ifdef HASPIGPIO
         if (shutterModeEnabled && shutterPressAllowed) //shutterMode isderived from user's decision, shutterPressAlowed is derived from motors state
         {
             if (shutterPin) // check if not nullptr, otherwise will segfault
@@ -198,7 +198,7 @@ void MotorWorker::run()
         }
 #endif
     }
-#ifdef RASPBERRYPI
+#ifdef HASPIGPIO
     if (driverId == 0)
     {
         aEnblPinPWMAlt->off();
@@ -212,12 +212,12 @@ void MotorWorker::run()
 
 MotorWorker::~MotorWorker()
 {
-#ifdef RASPBERRYPI
+#ifdef HASPIGPIO
     board.kill();
 #endif
 }
 
-#ifdef RASPBERRYPI
+#ifdef HASPIGPIO
 void MotorWorker::driveDRV8814(std::unique_ptr<pigpio_wcpp::DigitalOutput> &aPhPinAlt, std::unique_ptr<pigpio_wcpp::DigitalOutput> &bPhPinAlt,
                                std::unique_ptr<pigpio_wcpp::DigitalOutput> &aPhPinAzi, std::unique_ptr<pigpio_wcpp::DigitalOutput> &bPhPinAzi,
                                std::unique_ptr<pigpio_wcpp::PWM> &aEnblPinPWMAlt, std::unique_ptr<pigpio_wcpp::PWM> &bEnblPinPWMAlt,

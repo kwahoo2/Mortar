@@ -31,6 +31,7 @@
 
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QStringRef>
 
 StellarInterface::StellarInterface(QObject *parent) : QObject(parent)
 {

@@ -33,12 +33,12 @@
 #include <QMainWindow>
 #include <QTimer>
 
-#include <StellarInterface.h>
-#include <GamepadInterface.h>
-#include <MotorDriver.h>
-#include <SerialDriver.h>
-#include <PrefsDialog.h>
-#include <CorrectionTable.h>
+#include "StellarInterface.h"
+#include "GamepadInterface.h"
+#include "MotorDriver.h"
+#include "SerialDriver.h"
+#include "PrefsDialog.h"
+#include "CorrectionTable.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
