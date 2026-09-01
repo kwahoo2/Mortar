@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, Adrian Przekwas
+/* Copyright (c) 2026, Adrian Przekwas
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -27,66 +27,60 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MOTORDRIVER_H
-#define MOTORDRIVER_H
+#ifndef DATA_SENDER_H
+#define DATA_SENDER_H
 
+#include <cstdint>
+#include <QString>
 #include <QObject>
-#include <QDebug>
+#include <QTcpSocket>
+#include <QHostAddress>
 
-class MotorDriver : public QObject
+#define DRIVER_PORT 2137
+
+struct RemoteCommand
+{
+    uint8_t id; // 0x00 - ALT, 0x01 - AZI
+    uint8_t command; // 0x00 - set target value, 0x01 - set driver, 0x02 - set max speed
+    union {
+        int64_t intVal; // commands 0x01 and higher
+        double doubleVal; // command 0x00
+    } val;
+};
+
+class DataSender : public QObject
 {
     Q_OBJECT
-public:
-    explicit MotorDriver(QObject *parent = nullptr);
-
 private:
-    double currAltitude = 0.0;
-    double currAzimuth = 0.0;
-    double targetAltitude = 0.0;
-    double targetAzimuth = 0.0;
-    double oldTargetAltitude = 0.0;
-    double oldTargetAzimuth = 0.0;
-    double manualAltitudeCorrection = 0.0;
-    double manualAzimuthCorrection = 0.0;
-    double degPerStepAzi = 360.0/(400.0*44.0);
-    double degPerStepAlt = 360.0/(400.0*52.8);
-    double aziHyster = 0.1 * degPerStepAzi; //some hysteresis factor to compensate gears clearance, elemnts flexibility, should be much smaller than single step size
-    double altHyster = 0.1 * degPerStepAlt;
-    double altHTmp = 0.0, aziHTmp = 0.0;
-    bool remoteOpened = false;
+    RemoteCommand remoteCommand{};
+    QTcpSocket *socket;
+    bool isSocketOpened() const;
 
-    bool isSynced = false;
-    ~MotorDriver();
+public:
+    DataSender(QObject *parent = nullptr);
+    ~DataSender();
 
 public slots:
-    void setTargetAltitude (double val);
-    void setTargetAzimuth (double val);
-    void setCurrAltitude (double val);
-    void setCurrAzimuth (double val);
-    void updateAltitudeStepperTarget();
-    void updateAzimuthStepperTarget();
+    void setPositionAlt(double val);
+    void setPositionAzi(double val);
+    void openSocket(QString server_ip);
+    void sendData(const RemoteCommand &data);
+    void closeSocket(void);
+    void setDriver(int val);
+    void setMaxSpeedAlt(int val);
+    void setMaxSpeedAzi(int val);
+    void disableSteppers(bool val);
+    void setPaused(bool val);
+    void setHoldPWM(int val);
+    void setRunPWM(int val);
+    void setFastDecay(bool val);
+    void enableShutterMode(bool val);
 
-    void aziMoveStep(double val);
-    void altMoveStep(double val);
-    void setManualAltCorr (double val);
-    void setManualAziCorr (double val);
-
-    void setDegPerStepAzi(double val);
-    void setDegPerStepAlt(double val);
-    void setHysterAzi(double val);
-    void setHysterAlt(double val);
-
+signals:
     void remoteConnected();
     void remoteDisconnected();
 
-signals:
-    void setStepperAlt(double step);
-    void setStepperAzi(double step);
-
-    void showManualAltCorr(double val);
-    void showManualAziCorr(double val);
-
-
 };
 
-#endif // MOTORDRIVER_H
+
+#endif // DATA_SENDER_H

@@ -37,12 +37,17 @@ MainWindow::MainWindow(QWidget *parent)
 {
     stelin = new StellarInterface(this);
     motordriver = new MotorDriver(this);
+    motorworker = new MotorWorker(this);
+    datasender = new DataSender(this);
     serialdriver = new SerialDriver(this);
     gamepadin = new GamepadInterface(this);
     prefsdialog = new PrefsDialog(this); //dialog with options
     prefsdialog->setModal(false);
     corrtable = new CorrectionTable(this); //dialog for correction values
     corrtable->setModal(false);
+
+    connect(motordriver, SIGNAL(setStepperAlt(double)), motorworker, SLOT(setPositionAlt(double)));
+    connect(motordriver, SIGNAL(setStepperAzi(double)), motorworker, SLOT(setPositionAzi(double)));
 
     connect(stelin, SIGNAL(sendTime(QTime)), this, SLOT(setTimeEdit(QTime)));
     connect(stelin, SIGNAL(sendDate(QDate)), this, SLOT(setDateEdit(QDate)));
@@ -54,8 +59,20 @@ MainWindow::MainWindow(QWidget *parent)
     connect(prefsdialog, SIGNAL(setDegPerStepAzi(double)), motordriver, SLOT(setDegPerStepAzi(double)));
     connect(prefsdialog, SIGNAL(setDegPerStepAlt(double)), motordriver, SLOT(setDegPerStepAlt(double)));
 
-    connect(prefsdialog, SIGNAL(setSpeedAzi(int)), motordriver, SLOT(setSpeedAzi(int)));
-    connect(prefsdialog, SIGNAL(setSpeedAlt(int)), motordriver, SLOT(setSpeedAlt(int)));
+    // stepper preferences are send both to local and remote drivers
+    connect(prefsdialog, SIGNAL(setSpeedAzi(int)), motorworker, SLOT(setMaxSpeedAzi(int)));
+    connect(prefsdialog, SIGNAL(setSpeedAlt(int)), motorworker, SLOT(setMaxSpeedAlt(int)));
+    connect(prefsdialog, SIGNAL(setSpeedAzi(int)), datasender, SLOT(setMaxSpeedAzi(int)));
+    connect(prefsdialog, SIGNAL(setSpeedAlt(int)), datasender, SLOT(setMaxSpeedAlt(int)));
+    connect(prefsdialog, SIGNAL(setHoldPWM(int)), motorworker, SLOT(setHoldPWM(int)));
+    connect(prefsdialog, SIGNAL(setRunPWM(int)), motorworker, SLOT(setRunPWM(int)));
+    connect(prefsdialog, SIGNAL(setHoldPWM(int)), datasender, SLOT(setHoldPWM(int)));
+    connect(prefsdialog, SIGNAL(setRunPWM(int)), datasender, SLOT(setRunPWM(int)));
+    connect(prefsdialog, SIGNAL(setFastDecay(bool)), motorworker, SLOT(setFastDecay(bool)));
+    connect(prefsdialog, SIGNAL(setFastDecay(bool)), datasender, SLOT(setFastDecay(bool)));
+
+    connect(prefsdialog, SIGNAL(setDriver(int)), this, SLOT(setDriver(int)));
+
     connect(prefsdialog, SIGNAL(setSpeedAzi(int)), gamepadin, SLOT(setSpeedAzi(int)));
     connect(prefsdialog, SIGNAL(setSpeedAlt(int)), gamepadin, SLOT(setSpeedAlt(int)));
     connect(prefsdialog, SIGNAL(setDpadStepSize(double)), gamepadin, SLOT(setStepMul(double)));
@@ -63,14 +80,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(prefsdialog, SIGNAL(setHysterAzi(double)), motordriver, SLOT(setHysterAzi(double)));
     connect(prefsdialog, SIGNAL(setHysterAlt(double)), motordriver, SLOT(setHysterAlt(double)));
 
-    connect(prefsdialog, SIGNAL(setHoldPWM(int)), motordriver, SLOT(setHoldPWM(int)));
-    connect(prefsdialog, SIGNAL(setRunPWM(int)), motordriver, SLOT(setRunPWM(int)));
-
-    connect(prefsdialog, SIGNAL(setFastDecay(bool)), motordriver, SLOT(setFastDecay(bool)));
-    connect(prefsdialog, SIGNAL(setDriver(int)), motordriver, SLOT(setDriver(int)));
     connect(serialdriver, SIGNAL(askForSerial()), this, SLOT(askForSerial()));
     connect(serialdriver, SIGNAL(listPorts(QList<QSerialPortInfo>)), prefsdialog, SLOT(addPortsNames(QList<QSerialPortInfo>)));
     connect(prefsdialog, SIGNAL(givePortSelection(QString)), serialdriver, SLOT(setPort(QString)));
+    connect(prefsdialog, SIGNAL(setRemoteDriverIP(QString)), this, SLOT(setRemoteDriverIP(QString)));
 
     connect(prefsdialog, SIGNAL(changeTelescopeName(QString)), stelin, SLOT(changeTelescopeName(QString)));
     connect(prefsdialog, SIGNAL(changeStellHost(QString)), stelin, SLOT(changeStellHost(QString)));
@@ -92,6 +105,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(prefsdialog, SIGNAL(setPointsMinDist(double)), corrtable, SLOT(setPointsMinDist(double)));
 
+    connect(this, SIGNAL(connectRemoteDriver(QString)), datasender, SLOT(openSocket(QString)));
+    connect(this, SIGNAL(disconnectRemoteDriver()), datasender, SLOT(closeSocket()));
+
     serialdriver->refreshPorts();
     prefsdialog->loadSettings();
 
@@ -110,6 +126,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->powerDownButton->setCheckable(true);
     ui->startStopButton->setCheckable(true);
     ui->shutterModeButton->setCheckable(true);
+    ui->connectRemoteButton->setCheckable(true);
+
+    connect(datasender, SIGNAL(remoteConnected()), this, SLOT(remoteConnected()));
+    connect(datasender, SIGNAL(remoteDisconnected()), this, SLOT(remoteDisconnected()));
 
     QCommonStyle style;
     ui->altUpButton->setIcon(style.standardIcon(QStyle::SP_ArrowUp));
@@ -165,73 +185,39 @@ void MainWindow::togglePosUpdate()
     }
 }
 
-
-MainWindow::~MainWindow()
-{
-    serialdriver->closeSerial();
-    delete ui;
-}
-
-
-void MainWindow::on_syncButton_toggled(bool checked)
-{
-    if (checked)
-    {
-        ui->syncButton->setText("Sync active");
-        ui->pauseButton->setEnabled(true);
-        alignCurrTargetAlt(currAltitude);
-        alignCurrTargetAzi(currAzimuth);
-
-        enableMotorDriverConnection();
-
-    }
-    else
-    {
-        ui->syncButton->setText("Sync with Stellarium");
-        ui->pauseButton->setEnabled(false);
-        disableMotorDriverConnection();
-    }
-
-
-}
-
 void MainWindow::alignCurrTargetAlt(double alt) //Used when starting point is set
 {
-        motordriver->setCurrAltitude(alt);
-        motordriver->setTargetAltitude(alt);
+    motordriver->setCurrAltitude(alt);
+    motordriver->setTargetAltitude(alt);
 }
 void MainWindow::alignCurrTargetAzi(double azi)
 {
-       motordriver->setCurrAzimuth(azi);
-       motordriver->setTargetAzimuth(azi);
+    motordriver->setCurrAzimuth(azi);
+    motordriver->setTargetAzimuth(azi);
 }
 
 void MainWindow::on_pauseButton_toggled(bool checked)
 {
+    motorworker->setPaused(checked);
     if (checked)
     {
         ui->pauseButton->setText("Movement paused");
-        motordriver->pauseDriver(true);
     }
     else
     {
         ui->pauseButton->setText("Pause movement");
-        motordriver->pauseDriver(false);
     }
 }
 
-void MainWindow::on_actionMotor_Preferences_triggered()
+MainWindow::~MainWindow()
 {
-    prefsdialog->show();
+    serialdriver->closeSerial();
+    motorworker->stop();
+    while(motorworker->isRunning())
+    {
+    }
+    delete ui;
 }
-
-void MainWindow::on_actionCorrection_values_triggered()
-{
-    corrtable->show();
-    enableMotorDriverConnection(); //make sure motors are syncronised during calibration
-    ui->syncButton->setChecked(true);
-}
-
 
 void MainWindow::askForSerial()
 {
@@ -258,6 +244,60 @@ void MainWindow::setLocalizedName(const QString &name)
     ui->trackedObjLabel->setText(name);
 }
 
+void MainWindow::setDriver(int driverId)
+{
+    /*this method starts or restarts driver's thread after setting the driver's identifier
+    *should be used after user changes the driver in preferences*/
+    if (remoteOpened) {
+        datasender->setDriver(driverId);
+    }
+    else
+    {
+        if (motorworker->isRunning())
+        {
+            motorworker->stop();
+        }
+        while (motorworker->isRunning()) {
+        }
+        motorworker->setDriver(driverId);
+        motorworker->start();
+    }
+}
+
+void MainWindow::on_syncButton_toggled(bool checked)
+{
+    if (checked)
+    {
+        ui->syncButton->setText("Sync active");
+        ui->pauseButton->setEnabled(true);
+        alignCurrTargetAlt(currAltitude);
+        alignCurrTargetAzi(currAzimuth);
+
+        enableMotorDriverConnection();
+
+    }
+    else
+    {
+        ui->syncButton->setText("Sync with Stellarium");
+        ui->pauseButton->setEnabled(false);
+        disableMotorDriverConnection();
+    }
+
+
+}
+
+void MainWindow::on_actionMotor_Preferences_triggered()
+{
+    prefsdialog->show();
+}
+
+void MainWindow::on_actionCorrection_values_triggered()
+{
+    corrtable->show();
+    enableMotorDriverConnection(); //make sure motors are syncronised during calibration
+    ui->syncButton->setChecked(true);
+}
+
 void MainWindow::on_syncGPSButton_clicked()
 {
     stelin->enableGPSSync(true);
@@ -268,12 +308,12 @@ void MainWindow::on_powerDownButton_toggled(bool checked)
     if (checked)
     {
         ui->powerDownButton->setText("Steppers Disabled");
-        motordriver->stopDriver();
+        motorworker->disableSteppers(false);
     }
     else
     {
         ui->powerDownButton->setText("Disable Steppers");
-        motordriver->startDriver();
+        motorworker->disableSteppers(true);
     }
 }
 
@@ -301,10 +341,10 @@ void MainWindow::on_startStopButton_clicked(bool checked)
     }
     else
     {
-       ui->startStopButton->setText("Start Stop mode disabled");
-       updatePaused = false;
-       startStopTimer->stop();
-       //make sure that interface is connected to driver after button uncheck
+        ui->startStopButton->setText("Start Stop mode disabled");
+        updatePaused = false;
+        startStopTimer->stop();
+        //make sure that interface is connected to driver after button uncheck
         enableMotorDriverConnection();
 
     }
@@ -330,18 +370,59 @@ void MainWindow::disableMotorDriverConnection()
     disconnect(corrtable, SIGNAL(sendCorrectedAlt(double)), motordriver, SLOT(setTargetAltitude(double)));
 }
 
+void MainWindow::remoteConnected()
+{
+    remoteOpened = true;
+    ui->connectRemoteButton->setChecked(true);
+    ui->connectRemoteButton->setText("(Connected) Disconnect remote driver");
+
+    disconnect(motordriver,
+               SIGNAL(setStepperAlt(double)),
+               motorworker,
+               SLOT(setPositionAlt(double)));
+    disconnect(motordriver,
+               SIGNAL(setStepperAzi(double)),
+               motorworker,
+               SLOT(setPositionAzi(double)));
+
+    connect(motordriver, SIGNAL(setStepperAlt(double)), datasender, SLOT(setPositionAlt(double)));
+    connect(motordriver, SIGNAL(setStepperAzi(double)), datasender, SLOT(setPositionAzi(double)));
+
+    prefsdialog->sendStepperSettings(); // make sure that remote got up to date settings
+    datasender->enableShutterMode(ui->shutterModeButton->isChecked());
+
+}
+
+void MainWindow::remoteDisconnected()
+{
+    remoteOpened = false;
+    ui->connectRemoteButton->setChecked(false);
+    ui->connectRemoteButton->setText("Connect to remote driver");
+
+    disconnect(motordriver, SIGNAL(setStepperAlt(double)), datasender, SLOT(setPositionAlt(double)));
+    disconnect(motordriver, SIGNAL(setStepperAzi(double)), datasender, SLOT(setPositionAzi(double)));
+
+    connect(motordriver, SIGNAL(setStepperAlt(double)), motorworker, SLOT(setPositionAlt(double)));
+    connect(motordriver, SIGNAL(setStepperAzi(double)), motorworker, SLOT(setPositionAzi(double)));
+}
+
+void MainWindow::setRemoteDriverIP(QString ip)
+{
+    remoteIP = ip;
+}
+
 void MainWindow::on_shutterModeButton_toggled(bool checked)
 {
     if (checked)
     {
         ui->shutterModeButton->setText("Shutter mode enabled");
-        motordriver->enableShutterMode(true);
     }
     else
     {
         ui->shutterModeButton->setText("Enable shutter mode");
-        motordriver->enableShutterMode(false);
     }
+    motorworker->enableShutterMode(checked);
+    datasender->enableShutterMode(checked);
 }
 
 void MainWindow::on_virtTeleRadioButton_toggled(bool checked)
@@ -402,5 +483,13 @@ void MainWindow::on_altDownButton_released()
     gamepadin->moveDownPressed(false);
 }
 
-
-
+void MainWindow::on_connectRemoteButton_clicked()
+{
+    if (remoteOpened) {
+        motorworker->start(); // start local thread
+        emit disconnectRemoteDriver();
+    } else {
+        motorworker->stop();
+        emit connectRemoteDriver(remoteIP);
+    }
+}

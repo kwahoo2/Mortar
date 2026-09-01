@@ -34,6 +34,7 @@ endif()
 add_executable(${PROJECT_NAME}
     CorrectionTable.cpp
     GamepadInterface.cpp
+    DataSender.cpp
     MotorWorker.cpp
     MotorDriver.cpp
     SerialDriver.cpp
@@ -45,6 +46,7 @@ add_executable(${PROJECT_NAME}
     CorrectionTable.h
     GamepadInterface.h
     MainWindow.h
+    DataSender.h
     MotorWorker.h
     MotorDriver.h
     SerialDriver.h
@@ -64,6 +66,7 @@ qt_wrap_cpp(MOC_SRCS
     PrefsDialog.h
     StellarInterface.h
     GamepadInterface.h
+    DataSender.h
     MotorDriver.h
     MotorWorker.h
     SerialDriver.h

@@ -150,13 +150,12 @@ void MotorWorker::run()
     lastTime = elapsedTimer.nsecsElapsed();
     while (!worker_stopped)
     {
-
         qint64 actTime = elapsedTimer.nsecsElapsed();
         double timeDeltaD = static_cast<double>(actTime - lastTime) / 1000000000;
         lastTime = actTime;
 
-       //qDebug() << "MotorWorker Azi target pos: " << targetPosAzi << "act: " <<actPosAzi;
-       //qDebug() << "MotorWorker Alt target pos: " << targetPosAlt << "act: " <<actPosAlt;
+        // qDebug() << "MotorWorker Azi target pos: " << targetPosAzi << "act: " <<actPosAzi;
+        // qDebug() << "MotorWorker Alt target pos: " << targetPosAlt << "act: " <<actPosAlt;
 
 #ifdef HASPIGPIO
         if (shutterModeEnabled && shutterPressAllowed) //shutterMode isderived from user's decision, shutterPressAlowed is derived from motors state
@@ -540,6 +539,12 @@ void MotorWorker::setPaused(bool val)
     paused = val;
 }
 
+/*Fast Decay is DRV8814 specific
+ * In fast decay mode, once the PWM chopping current level has been reached, the H-bridge reverses state to
+*allow winding current to flow in a reverse direction. As the winding current approaches zero, the bridge is
+*disabled to prevent any reverse current flow.
+*In slow decay mode, winding current is re-circulated by enabling both of the low-side FETs in the bridge.
+ */
 void MotorWorker::setFastDecay(bool val)
 {
     qDebug() << "Fast decay:" << val;

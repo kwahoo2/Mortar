@@ -45,6 +45,7 @@ class PrefsDialog : public QDialog
 
 public:
     void loadSettings();
+    void sendStepperSettings();
 
     explicit PrefsDialog(QWidget *parent = nullptr);
     ~PrefsDialog();
@@ -69,6 +70,7 @@ signals:
     void setFastDecay(bool val);
     void setDpadStepSize(double val);
     void setPointsMinDist(double val);
+    void setRemoteDriverIP(QString str);
 
 private slots:
     void on_aziStepsSpinBox_valueChanged(double arg1);
@@ -89,14 +91,15 @@ private slots:
     void on_pointsDistSpinBox_valueChanged(double arg1);
     void on_driverComboBox_textActivated(const QString &arg1);
     void setActiveBoxes(int driverid);
-
-    void on_portsComboBox_activated(int index);
+    void on_remoteLineEdit_textChanged(const QString &arg1);
 
 private:
     double stepsPerMotorRotatAzi, stepsPerMotorRotatAlt;
     double gearRatioAzi, gearRatioAlt;
+    double degPerStepAzi, degPerStepAlt;
     QString stellHost, telescopeName;
     QString storedPort, storedDriver;
+    QString remoteIP;
     void loadPortSettings();
     void loadDriverSettings();
 

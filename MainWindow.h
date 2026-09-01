@@ -35,7 +35,9 @@
 
 #include "StellarInterface.h"
 #include "GamepadInterface.h"
+#include "MotorWorker.h"
 #include "MotorDriver.h"
+#include "DataSender.h"
 #include "SerialDriver.h"
 #include "PrefsDialog.h"
 #include "CorrectionTable.h"
@@ -61,10 +63,14 @@ private:
     double aziManCorr = 0.0;
     int startStopInterval = 10000;
     bool updatePaused = false;
+    QString remoteIP = "127.0.0.1"; // remote driver
+    bool remoteOpened = false;
     Ui::MainWindow *ui;
     StellarInterface *stelin;
     GamepadInterface *gamepadin;
+    MotorWorker *motorworker;
     MotorDriver *motordriver;
+    DataSender *datasender;
     SerialDriver *serialdriver;
     PrefsDialog *prefsdialog;
     CorrectionTable *corrtable;
@@ -72,6 +78,11 @@ private:
 
     void enableMotorDriverConnection();
     void disableMotorDriverConnection();
+
+public slots:
+    void remoteConnected();
+    void remoteDisconnected();
+    void setRemoteDriverIP(QString ip);
 
 private slots:
 
@@ -89,6 +100,7 @@ private slots:
     void setLocationEdit(QString location);
     void togglePosUpdate();
     void setLocalizedName(const QString &name);
+    void setDriver(int driverId);
 
     void on_syncButton_toggled(bool checked);
     void on_pauseButton_toggled(bool checked);
@@ -114,5 +126,10 @@ private slots:
     void on_altDownButton_pressed();
     void on_altUpButton_released();
     void on_altDownButton_released();
+    void on_connectRemoteButton_clicked();
+
+signals:
+    void connectRemoteDriver(QString ip);
+    void disconnectRemoteDriver();
 };
 #endif // MAINWINDOW_H

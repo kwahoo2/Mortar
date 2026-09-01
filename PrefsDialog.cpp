@@ -40,7 +40,10 @@ PrefsDialog::PrefsDialog(QWidget *parent) :
     stepsPerMotorRotatAlt = 400.0;
     gearRatioAzi = 44.0;
     gearRatioAlt = 22.0;
+    degPerStepAzi = (360.0 / stepsPerMotorRotatAzi) / gearRatioAzi;
+    degPerStepAlt = (360.0 / stepsPerMotorRotatAlt) / gearRatioAlt;
     stellHost = "localhost";
+    remoteIP = "127.0.0.1";
     telescopeName ="New Telescope 1";
     ui->driverComboBox->addItem("DRV8814");
     ui->driverComboBox->addItem("DRV8825");
@@ -57,7 +60,7 @@ void PrefsDialog::loadSettings()
         ui->aziStepsSpinBox->setValue(stepsPerMotorRotatAzi);
         ui->aziRatioSpinBox->setValue(gearRatioAzi);
 
-        double degPerStepAzi = (360.0 / stepsPerMotorRotatAzi) / gearRatioAzi;
+        degPerStepAzi = (360.0 / stepsPerMotorRotatAzi) / gearRatioAzi;
         emit setDegPerStepAzi(degPerStepAzi);
     }
     if (settings.contains("Altitude/stepsperrot") && settings.contains("Altitude/gearratio"))
@@ -68,7 +71,7 @@ void PrefsDialog::loadSettings()
         ui->altStepsSpinBox->setValue(stepsPerMotorRotatAlt);
         ui->altRatioSpinBox->setValue(gearRatioAlt);
 
-        double degPerStepAlt = (360.0 / stepsPerMotorRotatAlt) / gearRatioAlt;
+        degPerStepAlt = (360.0 / stepsPerMotorRotatAlt) / gearRatioAlt;
         emit setDegPerStepAlt(degPerStepAlt);
     }
     if (settings.contains("Azimuth/speed"))
@@ -142,6 +145,13 @@ void PrefsDialog::loadSettings()
         ui->pointsDistSpinBox->setValue(minDist);
         emit setPointsMinDist(minDist);
     }
+
+    if (settings.contains("Common/remoteip"))
+    {
+        remoteIP = settings.value("Common/remoteip").toString();
+        ui->remoteLineEdit->setText(remoteIP);
+        emit setRemoteDriverIP(remoteIP);
+    }
     loadDriverSettings();
 }
 
@@ -184,7 +194,7 @@ void PrefsDialog::on_aziStepsSpinBox_valueChanged(double arg1)
     settings.setValue("Azimuth/stepsperrot", arg1);
     settings.setValue("Azimuth/gearratio", gearRatioAzi);
     stepsPerMotorRotatAzi = arg1;
-    double degPerStepAzi = (360.0 / stepsPerMotorRotatAzi) / gearRatioAzi;
+    degPerStepAzi = (360.0 / stepsPerMotorRotatAzi) / gearRatioAzi;
     emit setDegPerStepAzi(degPerStepAzi);
 }
 
@@ -193,7 +203,7 @@ void PrefsDialog::on_altStepsSpinBox_valueChanged(double arg1)
     settings.setValue("Altitude/stepsperrot", arg1);
     settings.setValue("Altitude/gearratio", gearRatioAlt);
     stepsPerMotorRotatAlt = arg1;
-    double degPerStepAlt = (360.0 / stepsPerMotorRotatAlt) / gearRatioAlt;
+    degPerStepAlt = (360.0 / stepsPerMotorRotatAlt) / gearRatioAlt;
     emit setDegPerStepAlt(degPerStepAlt);
 }
 
@@ -202,7 +212,7 @@ void PrefsDialog::on_aziRatioSpinBox_valueChanged(double arg1)
     settings.setValue("Azimuth/gearratio", arg1);
     settings.setValue("Azimuth/stepsperrot", stepsPerMotorRotatAzi);
     gearRatioAzi = arg1;
-    double degPerStepAzi = (360.0 / stepsPerMotorRotatAzi) / gearRatioAzi;
+    degPerStepAzi = (360.0 / stepsPerMotorRotatAzi) / gearRatioAzi;
     emit setDegPerStepAzi(degPerStepAzi);
 }
 
@@ -211,7 +221,7 @@ void PrefsDialog::on_altRatioSpinBox_valueChanged(double arg1)
     settings.setValue("Altitude/gearratio", arg1);
     settings.setValue("Altitude/stepsperrot", stepsPerMotorRotatAlt);
     gearRatioAlt = arg1;
-    double degPerStepAlt = (360.0 / stepsPerMotorRotatAlt) / gearRatioAlt;
+    degPerStepAlt = (360.0 / stepsPerMotorRotatAlt) / gearRatioAlt;
     emit setDegPerStepAlt(degPerStepAlt);
 }
 
@@ -315,6 +325,13 @@ void PrefsDialog::on_driverComboBox_textActivated(const QString &arg1)
     emit setDriver(id);
 }
 
+void PrefsDialog::on_remoteLineEdit_textChanged(const QString &arg1)
+{
+    settings.setValue("Common/remoteip", arg1);
+    emit setRemoteDriverIP(arg1);
+}
+
+
 void PrefsDialog::setActiveBoxes(int driverid)
 {
     switch (driverid)
@@ -353,4 +370,15 @@ void PrefsDialog::setActiveBoxes(int driverid)
     }
 }
 
-void PrefsDialog::on_portsComboBox_activated(int index) {}
+void PrefsDialog::sendStepperSettings()
+{
+    emit setDegPerStepAzi(degPerStepAzi);
+    emit setDegPerStepAlt(degPerStepAlt);
+    emit setSpeedAzi(ui->aziSpeedSpinBox->value());
+    emit setSpeedAlt(ui->altSpeedSpinBox->value());
+    emit setHoldPWM(ui->holdPWMSpinBox->value());
+    emit setRunPWM(ui->runPWMSpinBox->value());
+    emit setDriver(ui->driverComboBox->currentIndex());
+    emit setFastDecay(ui->decayCheckBox->isChecked());
+}
+

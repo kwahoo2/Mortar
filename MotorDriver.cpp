@@ -32,55 +32,14 @@
 
 MotorDriver::MotorDriver(QObject *parent) : QObject(parent)
 {
-
-
-    mWorker = new MotorWorker(this);
-
     qDebug() << "degPerStepAzi" << degPerStepAzi;
     qDebug() << "degPerStepAlt" << degPerStepAlt;
-
-    connect(this, SIGNAL(setStepperAlt(double)), mWorker, SLOT(setPositionAlt(double)));
-    connect(this, SIGNAL(setStepperAzi(double)), mWorker, SLOT(setPositionAzi(double)));
-
 }
-
-void MotorDriver::setDriver(int driverId)
-{
-    /*this method starts or restarts driver's thread after setting the driver's identifier
-    *should be used after user changes the driver in preferences*/
-    if (mWorker->isRunning())
-    {
-        mWorker->stop();
-    }
-    while (mWorker->isRunning())
-    {
-
-    }
-    mWorker->setDriver(driverId);
-    mWorker->start();
-}
-
-void MotorDriver::startDriver()
-{
-    mWorker->disableSteppers(false);
-}
-void MotorDriver::stopDriver()
-{
-    mWorker->disableSteppers(true);
-}
-
-void MotorDriver::pauseDriver(bool val)
-{
-    mWorker->setPaused(val);
-}
-
 
 void MotorDriver::setTargetAltitude (double val)
 {
     targetAltitude = val;
     updateAltitudeStepperTarget();
-
-
 }
 void MotorDriver::setTargetAzimuth (double val)
 {
@@ -156,19 +115,6 @@ void MotorDriver::setHysterAlt(double val)
    qDebug() << "Altitude hysteresis: " << altHyster;
 }
 
-
-/*Fast Decay is DRV8814 specific
- * In fast decay mode, once the PWM chopping current level has been reached, the H-bridge reverses state to
-*allow winding current to flow in a reverse direction. As the winding current approaches zero, the bridge is
-*disabled to prevent any reverse current flow.
-*In slow decay mode, winding current is re-circulated by enabling both of the low-side FETs in the bridge.
- */
-void MotorDriver::setFastDecay(bool val)
-{
-    mWorker->setFastDecay(val);
-}
-
-
 /*altMoveStep is incremental used eg for gamepad input
 setManualAltiduteCorrection is absolute*/
 void MotorDriver::altMoveStep(double val)
@@ -198,35 +144,16 @@ void MotorDriver::setManualAziCorr (double val)
     emit showManualAziCorr(manualAzimuthCorrection);
 }
 
-void MotorDriver::setSpeedAzi(int val)
+void MotorDriver::remoteConnected()
 {
-    mWorker->setMaxSpeedAzi(val);
-}
-void MotorDriver::setSpeedAlt(int val)
-{
-    mWorker->setMaxSpeedAlt(val);
+    remoteOpened = true;
 }
 
-void MotorDriver::setHoldPWM(int val)
+void MotorDriver::remoteDisconnected()
 {
-    mWorker->setHoldPWM(val);
-}
-
-void MotorDriver::setRunPWM(int val)
-{
-    mWorker->setRunPWM(val);
-}
-
-void MotorDriver::enableShutterMode(bool val)
-{
-    mWorker->enableShutterMode(val);
+    remoteOpened = false;
 }
 
 MotorDriver::~MotorDriver()
 {
-    mWorker->stop();
-    while(mWorker->isRunning())
-    {
-
-    }
 }

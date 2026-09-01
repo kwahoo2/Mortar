@@ -47,6 +47,10 @@ public:
 
 public:
     void stop() {worker_stopped = true;}
+
+public slots:
+    void setPositionAlt(double pos);
+    void setPositionAzi(double pos);
     void setMaxSpeedAlt(int speed);
     void setMaxSpeedAzi(int speed);
     void disableSteppers(bool val);
@@ -56,10 +60,6 @@ public:
     void setFastDecay(bool val);
     void enableShutterMode(bool val);
     void setDriver(int id);
-
-public slots:
-    void setPositionAlt(double pos);
-    void setPositionAzi(double pos);
 
 signals:
     void sendPinStates(bool aPh, bool bPh, double aP, double bP);
