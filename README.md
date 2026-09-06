@@ -15,11 +15,11 @@ I wanted to make a simple to use interface to drive a dobsonian telescope. It sh
 * Stellarium
 * pigpio library
 * cmake
-* Qt
+* Qt 5 or 6
 * Qt serialport module
 * Qt charts module
 * SDL3 library
-* xdo3 library (optional)
+* xdo3 library (optional, non-functional on Wayland)
 
 
 ### Hardware
@@ -119,7 +119,7 @@ In the Mortar open the preferences and set the telescope name from Stellarium. I
 
 [prefs]: https://raw.githubusercontent.com/kwahoo2/Mortar/master/.github/images/remote.png "Mortar preferences" 
 
-You may use a gamepad to move your telescope. Analog stick works as coarse adjustment, dpad moves a stepper motor by a small (size is adjustable in options) step. R2 button emulates F11, and it is useful for Stellarium fullscreen toggle.
+You may use a gamepad to move your telescope. Analog stick works as coarse adjustment, dpad moves a stepper motor by a small (size is adjustable in options) step. R2 button emulates F11, and it is useful for Stellarium fullscreen toggle (only on X11, with libxdo).
 Alternatively, if you do not have a gamepad, you can move the telescope with arrows in the main window.
 
 ## Telescope calibration and observation
