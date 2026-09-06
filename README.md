@@ -18,6 +18,7 @@ I wanted to make a simple to use interface to drive a dobsonian telescope. It sh
 * Qt
 * Qt serialport module
 * Qt charts module
+* SDL3 library
 * xdo3 library (optional)
 
 
@@ -25,7 +26,7 @@ I wanted to make a simple to use interface to drive a dobsonian telescope. It sh
 
 * Altzimuth telescope
 * 3D-printed parts and bearings - see mechanical/telescope.FCStd. Parts are compatible with FreeCAD 1.1rc1.
-* Raspberry Pi
+* Raspberry Pi (1-4, 5 is not supported by pigpio)
 * Two bipolar stepper motors
 * Two stepper motor drivers DRV8814 OR two DRV8825 drivers (L298 is deprecated in master, see wiringpi-legacy branch)
 * (Optional) Gamepad
@@ -77,10 +78,23 @@ If you want use GPS, enable UART in the rpi-config utility.
 
 [uart]: https://raw.githubusercontent.com/kwahoo2/Mortar/master/.github/images/rpi-config.png "Raspberry UART setup" 
 
+### pigpio library
+
+pigpio is available only for Raspberry Pi 1 to 4, it cannot be used with Pi 5.
+Since Debian Trixie pigpio package is not longer available. User has to compile it manually.
+
+```
+wget https://github.com/joan2937/pigpio/archive/refs/tags/v79.tar.gz
+tar zxf v79.tar.gz
+cd pigpio-79
+make
+sudo make install
+```
+
 Download, compile and run the software.
 
 ```
-sudo apt install qtbase5-dev libqt5serialport5-dev libqt5charts5-dev libxdo-dev pigpio libsdl3-dev
+sudo apt install qtbase5-dev libqt5serialport5-dev libqt5charts5-dev libxdo-dev libsdl3-dev
 git clone --recurse-submodules https://github.com/kwahoo2/Mortar 
 cd Mortar
 mkdir -p build
@@ -155,13 +169,15 @@ Now you can run Mortar by double clicking on the Mortar.sh script.
 
 
 ## Disabling steppers at Pi boot
-Raspberry starts GPIO in an unknown state, stepper motors may consume some energy, before Mortar is even started. To avoid this, you can set AENBL and BENBL pins to low at the RPi OS boot.
+Raspberry starts GPIO in an unknown state, stepper motors may consume some energy, before Mortar is even started. To avoid this, you can set ENBL pins to low (or high in the case of DRV 8825 Hat) at the RPi OS boot.
 
 Edit:
 
-    /boot/config.txt
+    /boot/firmware/config.txt
 
 and add following lines:
+
+If DRV8814 board is used,
 
 ```
 gpio=4=op,dl
@@ -170,7 +186,66 @@ gpio=20=op,dl
 gpio=21=op,dl
 ```
 
-## Board testing, alternative usages
+If DRV8825 is used (pinout as in the preferences tab),
+
+```
+gpio=4=op,dh
+gpio=20=op,dh
+```
+
+If DRV8825 Hat (Waveshare) is used,
+
+```
+gpio=4=op,dl
+gpio=12=op,dl
+```
+
+## Using on PC with remote Pi driver
+
+Mortar can be compiled without GPIO support and ran on any PC. In that case you should run cli driver, on a remote Pi and connect with it from a PC.
+
+Compile the remote driver (on the Pi):
+
+```
+cd Mortar/pi\ remote\ driver/
+mkdir -p build
+cd build
+cmake ..
+make
+```
+
+Run the driver:
+
+```
+sudo ./Mortar-Remote-Driver
+```
+
+You may also like to limit allowed client IP:
+
+```
+sudo ./Mortar-Remote-Driver xxx.xxx.xxx.xxx
+```
+
+Then run the Mortar on the PC, fill remote driver IP in the preferences and click on "Connect to remote driver".
+
+The Pi driver should show something like:
+
+```
+sudo ./Mortar-Remote-Driver 
+No IP restriction. All IPs are allowed.
+Server listening on port 2137...
+Connection accepted from: 192.168.1.28
+Azi speed: 100
+Alt speed: 100
+Hold PWM: 20
+Run PWM: 40
+Driver id: 1
+Fast decay: 0
+Disable steppers: 0
+Shutter mode: 0
+```
+
+## Board testing, alternative usages for the DRV8814 board
 There is a very basic Python script ([mortartest.py](https://github.com/kwahoo2/Mortar/blob/master/basic-test-py/mortartest.py)) that allows using the MortarShield as basic stepper driver. It can be used as an example for building other scripts too.
 
 Before running it you have to have the pigpio daemon running:
@@ -190,10 +265,6 @@ python
 import mortartest
 mortartest.move_stepper_to(50, 0) # move first (0) stepper 50 steps forward, ALT stepper is 0, AZI is 1
 ```
-## WiringPi legacy brach
-
-wiringpi-legacy branch contains a deprecated implementation using WiringPi instead of pigpio. That brach supports full-step operation only. 
-
 
 ## License
 
