@@ -272,7 +272,6 @@ void MainWindow::on_syncButton_toggled(bool checked)
         ui->pauseButton->setEnabled(true);
         alignCurrTargetAlt(currAltitude);
         alignCurrTargetAzi(currAzimuth);
-
         enableMotorDriverConnection();
 
     }
@@ -308,12 +307,14 @@ void MainWindow::on_powerDownButton_toggled(bool checked)
     if (checked)
     {
         ui->powerDownButton->setText("Steppers Disabled");
-        motorworker->disableSteppers(false);
+        motorworker->disableSteppers(true);
+        datasender->disableSteppers(true);
     }
     else
     {
         ui->powerDownButton->setText("Disable Steppers");
-        motorworker->disableSteppers(true);
+        motorworker->disableSteppers(false);
+        datasender->disableSteppers(false);
     }
 }
 
@@ -362,12 +363,16 @@ void MainWindow::enableMotorDriverConnection()
 {
     connect(corrtable, SIGNAL(sendCorrectedAzi(double)), motordriver, SLOT(setTargetAzimuth(double)));
     connect(corrtable, SIGNAL(sendCorrectedAlt(double)), motordriver, SLOT(setTargetAltitude(double)));
+    connect(corrtable, SIGNAL(sendCorrectedAzi(double)), datasender, SLOT(setTargetAzimuth(double)));
+    connect(corrtable, SIGNAL(sendCorrectedAlt(double)), datasender, SLOT(setTargetAltitude(double)));
 
 }
 void MainWindow::disableMotorDriverConnection()
 {
     disconnect(corrtable, SIGNAL(sendCorrectedAzi(double)), motordriver, SLOT(setTargetAzimuth(double)));
     disconnect(corrtable, SIGNAL(sendCorrectedAlt(double)), motordriver, SLOT(setTargetAltitude(double)));
+    disconnect(corrtable, SIGNAL(sendCorrectedAzi(double)), datasender, SLOT(setTargetAzimuth(double)));
+    disconnect(corrtable, SIGNAL(sendCorrectedAlt(double)), datasender, SLOT(setTargetAltitude(double)));
 }
 
 void MainWindow::remoteConnected()
@@ -389,6 +394,7 @@ void MainWindow::remoteConnected()
     connect(motordriver, SIGNAL(setStepperAzi(double)), datasender, SLOT(setPositionAzi(double)));
 
     prefsdialog->sendStepperSettings(); // make sure that remote got up to date settings
+    datasender->disableSteppers(ui->powerDownButton->isChecked());
     datasender->enableShutterMode(ui->shutterModeButton->isChecked());
 
 }
