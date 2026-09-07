@@ -115,8 +115,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     if (!(serialdriver->isOpened()))
     {
-        QMessageBox::information(this, tr("Error"), tr("Unable to open serial port ") + serialdriver->getPort());
-        return;
+        QMessageBox::information(this, tr("Error"), tr("Unable to open serial port ") + serialdriver->getPort() + tr(", please adjust the port in the preferences"));
     }
 
     ui->setupUi(this);
