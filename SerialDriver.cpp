@@ -71,10 +71,12 @@ void SerialDriver::openSerial()
     serial->setStopBits(QSerialPort::OneStop);
     serial->open(QIODevice::ReadWrite);
 
-    serial->clear();
-
-    QObject::connect(serial, SIGNAL(readyRead()),
+    if (serial->isOpen())
+    {
+        serial->clear();
+        QObject::connect(serial, SIGNAL(readyRead()),
                      this, SLOT(readSerial()));
+    }
 }
 
 void SerialDriver::clearSer()

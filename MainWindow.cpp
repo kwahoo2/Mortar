@@ -113,11 +113,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     serialdriver->openSerial();
 
-    if (!(serialdriver->isOpened()))
-    {
-        QMessageBox::information(this, tr("Error"), tr("Unable to open serial port ") + serialdriver->getPort() + tr(", please adjust the port in the preferences"));
-    }
-
     ui->setupUi(this);
 
     ui->syncButton->setCheckable(true);
@@ -141,6 +136,11 @@ MainWindow::MainWindow(QWidget *parent)
     startStopTimer = new QTimer;
     startStopTimer->setInterval(startStopInterval);
     connect(startStopTimer, SIGNAL(timeout()), this, SLOT(togglePosUpdate()));
+
+    if (!(serialdriver->isOpened()))
+    {
+        QMessageBox::information(this, tr("Error"), tr("Unable to open serial port ") + serialdriver->getPort() + tr(", please adjust the port in the preferences"));
+    }
 }
 
 void MainWindow::setAzimuth(double azimuth)
